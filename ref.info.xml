@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<reference anchor='DNSNoise' target='http://ieeexplore.ieee.org/document/6903614/' >
+    <front>
+        <title abbrev='DNS Noise'>DNS Noise: Measuring the Pervasiveness of Disposable Domains in Modern DNS Traffic</title>
+        <author initials='' surname='' fullname=''>
+            <organization></organization>
+            <address>
+                <email></email></address></author>
+        <date year='' month='' />
+    </front>
+    <format type='' target='' />
+</reference>

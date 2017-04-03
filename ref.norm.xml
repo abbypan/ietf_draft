@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<reference anchor='RFC1034'>
+    <front>
+        <title>Domain Names - Concepts and Facilities</title>
+        <author initials='P.' surname='Mockapetris' fullname=''>
+            <organization /></author>
+        <date year='1987' month='November' />
+    </front>
+    <seriesInfo name='RFC' value='1034' />
+    <format type='TXT' target='http://www.rfc-editor.org/rfc/rfc1034.txt' />
+</reference>
+
+<reference anchor='RFC1035'>
+    <front>
+        <title>Domain Names - Implementation and Specification</title>
+        <author initials='P.' surname='Mockapetris' fullname=''>
+            <organization /></author>
+        <date year='1987' month='November' />
+    </front>
+    <seriesInfo name='RFC' value='1035' />
+    <format type='TXT' target='http://www.rfc-editor.org/rfc/rfc1035.txt' />
+</reference>
+
+
+<reference anchor='RFC2119'>
+    <front>
+        <title>Key words for use in RFCs to Indicate Requirement Levels</title>
+        <author initials='S.' surname='Bradner' fullname=''><organization /></author>
+        <date year='1997' month='March' />
+    </front>
+    <seriesInfo name='RFC' value='2119' />
+    <format type='TXT' target='http://www.rfc-editor.org/rfc/rfc2119.txt' />
+</reference>
+
+<reference anchor='RFC2308'>
+    <front>
+        <title>Negative Caching of DNS Queries (DNS NCACHE)</title>
+        <author initials='M.' surname='Andrews' fullname=''><organization /></author>
+        <date year='1998' month='March' />
+    </front>
+    <seriesInfo name='RFC' value='2308' />
+    <format type='TXT' target='http://www.rfc-editor.org/rfc/rfc2308.txt' />
+</reference>
+
+<reference anchor='RFC4592'>
+    <front>
+        <title>The Role of Wildcards in the Domain Name System</title>
+        <author initials='E.' surname='Lewis' fullname=''><organization /></author>
+        <date year='2006' month='July' />
+    </front>
+    <seriesInfo name='RFC' value='4592' />
+    <format type='TXT' target='http://www.rfc-editor.org/rfc/rfc4592.txt' />
+</reference>
+
+
+<reference anchor='RFC7719'>
+    <front>
+        <title>DNS Terminology</title>
+        <author initials='P.' surname='Hoffman' fullname=''><organization /></author>
+        <author initials='A.' surname='Sullivan' fullname=''><organization /></author>
+        <author initials='K.' surname='Fujiwara' fullname=''><organization /></author>
+        <date year='2015' month='December' />
+    </front>
+    <seriesInfo name='RFC' value='7719' />
+    <format type='TXT' target='http://www.rfc-editor.org/rfc/rfc7719.txt' />
+</reference>
+
+<reference anchor='RFC7871'>
+    <front>
+        <title>Client Subnet in DNS Queries</title>
+        <author initials='C.' surname='Contavalli' fullname=''><organization /></author>
+        <author initials='W.' surname='van der Gasst' fullname=''><organization /></author>
+        <author initials='D.' surname='Lawrence' fullname=''><organization /></author>
+        <author initials='W.' surname='Kumari' fullname=''><organization /></author>
+        <date year='2016' month='May' />
+    </front>
+    <seriesInfo name='RFC' value='7871' />
+    <format type='TXT' target='http://www.rfc-editor.org/rfc/rfc7871.txt' />
+</reference>
+
+<reference anchor='RFC8020'>
+    <front>
+        <title>NXDOMAIN: There Really Is Nothing Underneath</title>
+        <author initials='S.' surname='Bortzmeyer' fullname=''><organization /></author>
+        <author initials='S.' surname='Huque' fullname=''><organization /></author>
+        <date year='2016' month='Nov' />
+    </front>
+    <seriesInfo name='RFC' value='8020' />
+    <format type='TXT' target='http://www.rfc-editor.org/rfc/rfc8020.txt' />
+</reference>
