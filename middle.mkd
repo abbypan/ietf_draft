@@ -71,7 +71,7 @@ Note that, there is not any other subdomain configured in the "foo.com" zone exc
 
 ## Intermediate Nameserver: Recursive Resolver
 
-### Send Query
+### Get Subdomain Wildcard Response
 
 Recursive Resolver sends "xxx.foo.com" A RR query to Authoritative Nameserver, get dns response: "xxx.foo.com" CNAME to "_.foo.com".
 
@@ -80,7 +80,7 @@ Recursive Resolver sends "xxx.foo.com" A RR query to Authoritative Nameserver, g
     map.bar.net.	600	IN	A	    202.38.64.10
     foo.com.      86400 IN  SWILD   _.foo.com.
 
-### Recursive Resolvers that that support SWILD RR
+### Recursive Resolvers that support SWILD RR
 
 Recursive Resolver knows that SWILD RR is for wildcard domain on recursive side, marks "_.foo.com" as wildcard domains of "*.foo.com".  The next time, Recursive Resolver receives a "yyy.foo.com" A RR query, it can directly return a wildcard CNAME as response.
 
