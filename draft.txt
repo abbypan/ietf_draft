@@ -61,9 +61,9 @@ Copyright Notice
    (xxx.github.io, yyy.github.io, ... ) of the same wildcard domain
    configuration.
 
-   Moreover, DNS Noise [DNSNoise] found that many of wildcard domains
-   are disposable (short live time), but with low cache hit rate,
-   increase cache size.
+   Moreover, [DNSNoise] found that many of wildcard domains are
+   disposable (short live time), but with low cache hit rate, increase
+   cache size.
 
    This document describes SWILD RR and wildcard detect method for
    Intermediate Nameservers to cache wildcard domain record, in order to
@@ -173,8 +173,8 @@ Copyright Notice
 
 3.3.  Intermediate Nameserver: Forwarding Resolvers
 
-   Forwarding Resolver sends query to Recursive Resolver is similar to
-   Recursive Resolver sends query to Authoritative Nameserver.
+   Forwarding Resolver sends query to its next-hop Resolver is similar
+   to Recursive Resolver sends query to Authoritative Nameserver.
 
 4.  DNS Cache
 
@@ -232,3 +232,4 @@ Copyright Notice
               "DNS Noise: Measuring the Pervasiveness of Disposable
               Domains in Modern DNS Traffic",
               <http://ieeexplore.ieee.org/document/6903614/>.
+

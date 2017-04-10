@@ -21,7 +21,7 @@ Take "*.github.io" for example,
 
 Wildcard domain is simple configured on Authoritative Nameserver, but Intermediate Nameservers have to cache various domains (xxx.github.io, yyy.github.io, ... ) of the same wildcard domain configuration.
 
-Moreover, [DNS Noise](#DNSNoise) found that many of wildcard domains are disposable (short live time), but with low cache hit rate, increase cache size.
+Moreover, [](#DNSNoise) found that many of wildcard domains are disposable (short live time), but with low cache hit rate, increase cache size.
 
 This document describes SWILD RR and wildcard detect method for Intermediate Nameservers to cache wildcard domain record, in order to reduce the cache size and optimize the wildcard domain cache miss.
 
@@ -109,7 +109,7 @@ The next time, Recursive Resolver receives a "yyy.foo.com" A RR query, it can se
 
 ## Intermediate Nameserver: Forwarding Resolvers
 
-Forwarding Resolver sends query to Recursive Resolver is similar to Recursive Resolver sends query to Authoritative Nameserver.
+Forwarding Resolver sends query to its next-hop Resolver is similar to Recursive Resolver sends query to Authoritative Nameserver.
 
 # DNS Cache
 
