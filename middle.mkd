@@ -23,7 +23,7 @@ Wildcard domain is simple configured on Authoritative Nameserver, but Intermedia
 
 Moreover, [](#DNSNoise) found that many of wildcard domains are disposable (short live time), but with low cache hit rate, increase cache size.
 
-This document describes SWILD RR and wildcard detect method for Intermediate Nameservers to cache wildcard domain record, in order to reduce the cache size and optimize the wildcard domain cache miss.
+This document specifies a new SWILD RR type and describes a wildcard detect method for Intermediate Nameservers to cache wildcard domain record, in order to reduce the cache size and optimize the wildcard domain cache miss.
 
 It is OPT-IN, Intermediate Nameservers can choose not to implement or enable it.
    
@@ -41,9 +41,19 @@ Recursive Resolver: Described in [](#RFC1035) Section 7.
 
 Forwarding Resolver: Described in [](#RFC2308) Section 1.  
 
-# Overview
+# The SWILD Resource Record
+
+The presentation format of the SWILD RR is as follows:
+
+       owner ttl class ALIAS target
+
+The "target" is a subdomain of the owner, to indicate that all subdomains of the "owner" have the same configuration with the "target".
+
+# Overview 
 
 We use a special character "_" to indicate the wildcard domain configuration on Intermediate Nameservers, make all the subdomains CNAME to the "_" subdomain, and generate a SWILD RR "_".
+
+If most of Recursive Resolvers support SWILD RR in the future, the wildcard detect method can be deprecated on the Recursive Resolvers, "_" special character is not stricted use for SWILD subdomain name.
 
 Take  "*.foo.com" for example.
 
@@ -58,7 +68,6 @@ Authoritative Nameserver configures the zonefile of "foo.com":
 3) make "*.foo.com" CNAME to "_.foo.com". 
 
 4) configure "_.foo.com".
-
 
 Note that, there is not any other subdomain configured in the "foo.com" zone except "_.foo.com".
 
