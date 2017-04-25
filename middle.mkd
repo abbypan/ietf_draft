@@ -13,11 +13,11 @@ Nowadays wildcard domain is globally used, especially on CDN, P2P, advertise, an
 
 Take "*.github.io" for example, 
 
-    foo.github.io.		3599	IN	CNAME	github.map.fastly.net.
-    github.map.fastly.net.	25	IN	A	151.101.0.133
-    github.map.fastly.net.	25	IN	A	151.101.192.133
-    github.map.fastly.net.	25	IN	A	151.101.64.133
-    github.map.fastly.net.	25	IN	A	151.101.128.133
+    foo.github.io.		  3599	IN	CNAME	github.map.fastly.net.
+    github.map.fastly.net.	25	IN	A	    151.101.0.133
+    github.map.fastly.net.	25	IN	A	    151.101.192.133
+    github.map.fastly.net.	25	IN	A	    151.101.64.133
+    github.map.fastly.net.	25	IN	A	    151.101.128.133
 
 Wildcard domain is simple configured on Authoritative Nameserver, but Intermediate Nameservers have to cache various domains (xxx.github.io, yyy.github.io, ... ) of the same wildcard domain configuration.
 
@@ -53,7 +53,7 @@ The "target" is a subdomain of the owner, to indicate that all subdomains of the
 
 We use a special character "_" to indicate the wildcard domain configuration on Intermediate Nameservers, make all the subdomains CNAME to the "_" subdomain, and generate a SWILD RR "_".
 
-If most of Recursive Resolvers support SWILD RR in the future, the wildcard detect method can be deprecated on the Recursive Resolvers, "_" special character is not stricted use for SWILD subdomain name.
+If most of Recursive Resolvers support SWILD RR in the future, the wildcard detect method can be deprecated on the Recursive Resolvers, "_" special character will be not strictly use for SWILD target.
 
 Take  "*.foo.com" for example.
 
@@ -82,49 +82,50 @@ Note that, there is not any other subdomain configured in the "foo.com" zone exc
 
 ### Get Subdomain Wildcard Response
 
-Recursive Resolver sends "xxx.foo.com" A RR query to Authoritative Nameserver, get dns response: "xxx.foo.com" CNAME to "_.foo.com".
+Recursive Resolver sends "xxx.foo.com" A RR query to Authoritative Nameserver, get DNS response: "xxx.foo.com" CNAME to "_.foo.com".
 
-    xxx.foo.com.	600	IN	CNAME	_.foo.com.
-    _.foo.com.	   3600	IN	CNAME	map.bar.net.
-    map.bar.net.	600	IN	A	    202.38.64.10
-    foo.com.      86400 IN  SWILD   _.foo.com.
+    xxx.foo.com.	600	    IN	CNAME	_.foo.com.
+    _.foo.com.	   3600	    IN	CNAME	map.bar.net.
+    map.bar.net.	600	    IN	A	    202.38.64.10
+    foo.com.      86400     IN  SWILD   _.foo.com.
 
 ### Recursive Resolvers that support SWILD RR
 
 Recursive Resolver knows that SWILD RR is for wildcard domain on recursive side, marks "_.foo.com" as wildcard domains of "*.foo.com".  The next time, Recursive Resolver receives a "yyy.foo.com" A RR query, it can directly return a wildcard CNAME as response.
 
-    yyy.foo.com.	600	IN	CNAME	_.foo.com.
-    _.foo.com.	   3600	IN	CNAME	map.bar.net.
-    map.bar.net.	600	IN	A	    202.38.64.10
-    foo.com.      86400 IN  SWILD   _.foo.com.
+    yyy.foo.com.	600	    IN	CNAME	_.foo.com.
+    _.foo.com.	   3600	    IN	CNAME	map.bar.net.
+    map.bar.net.	600	    IN	A	    202.38.64.10
+    foo.com.      86400     IN  SWILD   _.foo.com.
 
-### Recursive Resolvers that not support SWILD RR, but support wildcard detect method
+### Recursive Resolvers that support wildcard detect method
 
-Recursive Resolver knows that "_" is special character for wildcard domain on recursive side, and sends a "foo.com" TXT RR query to Authoritative Nameserver, get dns response: foo.com subdomain is wildcard.
+Recursive Resolver knows that "_" is special character for wildcard domain on recursive side, and sends a "foo.com" TXT RR query to Authoritative Nameserver, get DNS response: foo.com subdomain is wildcard.
 
-    foo.com.		86400	IN	TXT	"subdomain_wildcard: _"
+    foo.com.	  86400	IN	TXT	"subdomain_wildcard: _"
 
 Recursive Resolver marks "_.foo.com" as wildcard domains of "*.foo.com".  The next time, Recursive Resolver receives a "yyy.foo.com" A RR query, it can directly return a wildcard CNAME as response.
 
-    yyy.foo.com.	600	IN	CNAME	_.foo.com.
-    _.foo.com.	   3600	IN	CNAME	map.bar.net.
-    map.bar.net.	600	IN	A	    202.38.64.10
+    yyy.foo.com.	600	    IN	CNAME	_.foo.com.
+    _.foo.com.	   3600	    IN	CNAME	map.bar.net.
+    map.bar.net.	600	    IN	A	    202.38.64.10
+    foo.com.      86400	    IN	TXT	    "subdomain_wildcard: _"
 
 ### Recursive Resolvers that not support neither SWILD RR nor wildcard detect method
 
-Recursive Resolver can deal dns response as usual.
+Recursive Resolver can deal with DNS response as usual.
 
-The next time, Recursive Resolver receives a "yyy.foo.com" A RR query, it can send dns query to Authoritative Nameserver.
+The next time, Recursive Resolver receives a "yyy.foo.com" A RR query, it can send DNS query to Authoritative Nameserver.
 
 ## Intermediate Nameserver: Forwarding Resolvers
 
-Forwarding Resolver sends query to its next-hop Resolver is similar to Recursive Resolver sends query to Authoritative Nameserver.
+Forwarding Resolver sends query to its next-hop Resolver is similar with Recursive Resolver sends query to Authoritative Nameserver.
 
 # DNS Cache
 
 Intermediate Nameservers' cache size can be reduced, avoid to cache various domains of the same wildcard domain configuration. 
 
-Intermediate Nameservers' cache hit rate can be rised, avoid to query Authoritative Nameserver for the same wildcard domain configuration.
+Intermediate Nameservers' cache hit rate will rise, avoid to query Authoritative Nameserver for the same wildcard domain configuration.
 
 # DNSSEC
 
@@ -134,4 +135,4 @@ DNSSEC-Enabled Intermediate Nameservers that support wildcard detect method can 
 
 # Acknowledgements
 
-Thanks a lot to all in the DNSOP, DNSPRIV and DNSEXT mailing list.
+Thanks to all in the DNSOP, DNSPRIV and DNSEXT mailing list.
