@@ -127,14 +127,13 @@ Copyright Notice
 
    Authoritative Nameserver configures the zonefile of "foo.com":
 
-   1.  add SWILD RR "_" to indicate subdomain wildcard.
+   o  add SWILD RR "_" to indicate subdomain wildcard.
 
-   2.  add TXT RR "subdomain_wildcard: _" to indicate subdomain
-       wildcard.
+   o  add TXT RR "subdomain_wildcard: _" to indicate subdomain wildcard.
 
-   3.  make "*.foo.com" CNAME to "_.foo.com".
+   o  make "*.foo.com" CNAME to "_.foo.com".
 
-   4.  configure "_.foo.com".
+   o  configure "_.foo.com".
 
    Note that, there is not any other subdomain configured in the
    "foo.com" zone except "_.foo.com".
