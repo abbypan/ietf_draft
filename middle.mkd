@@ -1,11 +1,5 @@
 # Introduction
 
-<?rfc toc="yes"?>
-<?rfc symrefs="yes"?>
-<?rfc sortrefs="yes"?>
-<?rfc subcompact="no"?>
-<?rfc compact="yes"?>
-<?rfc comments="yes"?>
 
 [](#RFC1034) and [](#RFC4592) describe wildcard domain name.
 

@@ -2,16 +2,15 @@
 
 
 
-
 Network Working Group                                             L. Pan
 Internet-Draft
 Intended status: Informational                                     Y. Fu
-Expires: October 27, 2017                                          CNNIC
-                                                          April 25, 2017
+Expires: November 12, 2017                                         CNNIC
+                                                            May 11, 2017
 
 
               Wildcard on Intermediate Nameservers (SWILD)
-             draft-pan-wildcard-on-intermediate-nameservers
+           draft-pan-wildcard-on-intermediate-nameservers-00
 
 Abstract
 
@@ -35,7 +34,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on October 27, 2017.
+   This Internet-Draft will expire on November 12, 2017.
 
 Copyright Notice
 
@@ -51,6 +50,36 @@ Copyright Notice
    include Simplified BSD License text as described in Section 4.e of
    the Trust Legal Provisions and are provided without warranty as
    described in the Simplified BSD License.
+
+
+
+Pan & Fu                Expires November 12, 2017               [Page 1]
+
+Internet-DraftWildcard on Intermediate Nameservers (SWILD)      May 2017
+
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   3
+   3.  The SWILD Resource Record . . . . . . . . . . . . . . . . . .   3
+   4.  Overview  . . . . . . . . . . . . . . . . . . . . . . . . . .   3
+     4.1.  Authoritative Nameserver  . . . . . . . . . . . . . . . .   4
+     4.2.  Intermediate Nameserver: Recursive Resolver . . . . . . .   4
+       4.2.1.  Get Subdomain Wildcard Response . . . . . . . . . . .   4
+       4.2.2.  Recursive Resolvers that support SWILD RR . . . . . .   4
+       4.2.3.  Recursive Resolvers that support wildcard detect
+               method  . . . . . . . . . . . . . . . . . . . . . . .   5
+       4.2.4.  Recursive Resolvers that not support neither SWILD RR
+               nor wildcard detect method  . . . . . . . . . . . . .   5
+     4.3.  Intermediate Nameserver: Forwarding Resolvers . . . . . .   5
+   5.  DNS Cache . . . . . . . . . . . . . . . . . . . . . . . . . .   5
+   6.  DNSSEC  . . . . . . . . . . . . . . . . . . . . . . . . . . .   5
+   7.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   6
+   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   6
+     8.1.  Normative References  . . . . . . . . . . . . . . . . . .   6
+     8.2.  Informative References  . . . . . . . . . . . . . . . . .   6
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   6
 
 1.  Introduction
 
@@ -75,6 +104,15 @@ Copyright Notice
    Moreover, [DNSNoise] found that many of wildcard domains are
    disposable (short live time), but with low cache hit rate, increase
    cache size.
+
+
+
+
+
+Pan & Fu                Expires November 12, 2017               [Page 2]
+
+Internet-DraftWildcard on Intermediate Nameservers (SWILD)      May 2017
+
 
    This document specifies a new SWILD RR type and describes a wildcard
    detect method for Intermediate Nameservers to cache wildcard domain
@@ -123,6 +161,15 @@ Copyright Notice
 
    Take "*.foo.com" for example.
 
+
+
+
+
+Pan & Fu                Expires November 12, 2017               [Page 3]
+
+Internet-DraftWildcard on Intermediate Nameservers (SWILD)      May 2017
+
+
 4.1.  Authoritative Nameserver
 
    Authoritative Nameserver configures the zonefile of "foo.com":
@@ -168,6 +215,16 @@ Copyright Notice
    _.foo.com.     3600     IN  CNAME   map.bar.net.
    map.bar.net.    600     IN  A       202.38.64.10
    foo.com.      86400     IN  SWILD   _.foo.com.
+
+
+
+
+
+
+Pan & Fu                Expires November 12, 2017               [Page 4]
+
+Internet-DraftWildcard on Intermediate Nameservers (SWILD)      May 2017
+
 
 4.2.3.  Recursive Resolvers that support wildcard detect method
 
@@ -218,6 +275,13 @@ Copyright Notice
    method can save cost, only validating the SWILD/TXT RRSIG of
    "foo.com" and the RRSIGs of "_.foo.com".
 
+
+
+Pan & Fu                Expires November 12, 2017               [Page 5]
+
+Internet-DraftWildcard on Intermediate Nameservers (SWILD)      May 2017
+
+
 7.  Acknowledgements
 
    Thanks to all in the DNSOP, DNSPRIV and DNSEXT mailing list.
@@ -266,6 +330,14 @@ Authors' Addresses
    URI:   https://github.com/abbypan
 
 
+
+
+
+Pan & Fu                Expires November 12, 2017               [Page 6]
+
+Internet-DraftWildcard on Intermediate Nameservers (SWILD)      May 2017
+
+
    Yu Fu
    CNNIC
    No.4 South 4th Street, Zhongguancun
@@ -274,3 +346,47 @@ Authors' Addresses
 
    Email: fuyu@cnnic.cn
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pan & Fu                Expires November 12, 2017               [Page 7]

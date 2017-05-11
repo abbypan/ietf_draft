@@ -6,7 +6,17 @@
 <!ENTITY pandocRefinfo  PUBLIC '' 'ref.info.xml'>
 ]>
 
-<rfc category="info" docName="draft-pan-wildcard-on-intermediate-nameservers">
+<rfc category="info" docName="draft-pan-wildcard-on-intermediate-nameservers-00"  ipr="trust200902">
+    
+<?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+
+<?rfc toc="yes" ?>
+<?rfc symrefs="yes" ?>
+<?rfc sortrefs="yes" ?>
+<?rfc subcompact="no" ?>
+<?rfc compact="yes" ?>
+<?rfc comments="yes" ?>
+
  <front>
         <title abbrev="Wildcard on Intermediate Nameservers (SWILD)">Wildcard on Intermediate Nameservers (SWILD)</title>
 
@@ -33,7 +43,7 @@
             </address>
         </author>
 
-        <date month="April" year="2017"/>
+        <date month="May" year="2017"/>
 
         <area>General</area>
         <workgroup>Network Working Group</workgroup>
