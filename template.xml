@@ -56,7 +56,7 @@
         <keyword>resolver</keyword>
         <abstract>
 <t>
-This document describes a new SWILD RR type and a wildcard detect method for Intermediate Nameservers to cache wildcard domain record, in order to reduce the cache size and optimize the wildcard domain cache miss.
+This document describes a new SWILD RR type for Intermediate Nameservers to cache subdomain wildcard record, in order to reduce the cache size and optimize the wildcard domain cache miss.
 </t>
         </abstract>
 </front>

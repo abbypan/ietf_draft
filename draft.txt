@@ -14,10 +14,9 @@ Expires: January 4, 2018                                           CNNIC
 
 Abstract
 
-   This document describes a new SWILD RR type and a wildcard detect
-   method for Intermediate Nameservers to cache wildcard domain record,
-   in order to reduce the cache size and optimize the wildcard domain
-   cache miss.
+   This document describes a new SWILD RR type for Intermediate
+   Nameservers to cache subdomain wildcard record, in order to reduce
+   the cache size and optimize the wildcard domain cache miss.
 
 Status of This Memo
 
@@ -53,6 +52,7 @@ Copyright Notice
 
 
 
+
 Pan & Fu                 Expires January 4, 2018                [Page 1]
 
 Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
@@ -64,20 +64,16 @@ Table of Contents
    2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   3
    3.  The SWILD Resource Record . . . . . . . . . . . . . . . . . .   3
    4.  Overview  . . . . . . . . . . . . . . . . . . . . . . . . . .   3
-     4.1.  Authoritative Nameserver  . . . . . . . . . . . . . . . .   4
+     4.1.  Authoritative Nameserver  . . . . . . . . . . . . . . . .   3
      4.2.  Intermediate Nameserver: Recursive Resolver . . . . . . .   4
-       4.2.1.  Get Subdomain Wildcard Response . . . . . . . . . . .   4
-       4.2.2.  Recursive Resolvers that support SWILD RR . . . . . .   4
-       4.2.3.  Recursive Resolvers that support wildcard detect
-               method  . . . . . . . . . . . . . . . . . . . . . . .   5
-       4.2.4.  Recursive Resolvers that not support neither SWILD RR
-               nor wildcard detect method  . . . . . . . . . . . . .   5
-     4.3.  Intermediate Nameserver: Forwarding Resolvers . . . . . .   5
+       4.2.1.  Recursive Resolvers that support SWILD RR . . . . . .   4
+       4.2.2.  Recursive Resolvers that not support SWILD RR . . . .   4
+     4.3.  Intermediate Nameserver: Forwarding Resolvers . . . . . .   4
    5.  DNS Cache . . . . . . . . . . . . . . . . . . . . . . . . . .   5
    6.  DNSSEC  . . . . . . . . . . . . . . . . . . . . . . . . . . .   5
-   7.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   6
-   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   6
-     8.1.  Normative References  . . . . . . . . . . . . . . . . . .   6
+   7.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   5
+   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   5
+     8.1.  Normative References  . . . . . . . . . . . . . . . . . .   5
      8.2.  Informative References  . . . . . . . . . . . . . . . . .   6
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   6
 
@@ -105,6 +101,10 @@ Table of Contents
    disposable (short live time), but with low cache hit rate, increase
    cache size.
 
+   This document specifies a new SWILD RR type for Intermediate
+   Nameservers to cache subdomain wildcard record, in order to reduce
+   the cache size and optimize the wildcard domain cache miss.
+
 
 
 
@@ -113,11 +113,6 @@ Pan & Fu                 Expires January 4, 2018                [Page 2]
 
 Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
-
-   This document specifies a new SWILD RR type and describes a wildcard
-   detect method for Intermediate Nameservers to cache wildcard domain
-   record, in order to reduce the cache size and optimize the wildcard
-   domain cache miss.
 
    It is OPT-IN, Intermediate Nameservers can choose not to implement or
    enable it.
@@ -161,6 +156,11 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
    Take "*.foo.com" for example.
 
+4.1.  Authoritative Nameserver
+
+   Authoritative Nameserver configures the zonefile of "foo.com":
+
+   o  add SWILD RR "_" to indicate subdomain wildcard.
 
 
 
@@ -170,17 +170,9 @@ Pan & Fu                 Expires January 4, 2018                [Page 3]
 Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
 
-4.1.  Authoritative Nameserver
-
-   Authoritative Nameserver configures the zonefile of "foo.com":
-
-   o  add SWILD RR "_" to indicate subdomain wildcard.
-
-   o  add TXT RR "subdomain_wildcard: _" to indicate subdomain wildcard.
+   o  configure "_.foo.com".
 
    o  make "*.foo.com" CNAME to "_.foo.com".
-
-   o  configure "_.foo.com".
 
    Note that, there is not any other subdomain configured in the
    "foo.com" zone except "_.foo.com".
@@ -188,65 +180,33 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
    $ORIGIN  foo.com.
 
    @    86400  IN   SWILD  _
-   @    86400  IN   TXT    "subdomain_wildcard: _"
    _     3600  IN   CNAME  map.bar.net.
    *      600  IN   CNAME  _
 
 4.2.  Intermediate Nameserver: Recursive Resolver
 
-4.2.1.  Get Subdomain Wildcard Response
+4.2.1.  Recursive Resolvers that support SWILD RR
 
    Recursive Resolver sends "xxx.foo.com" A RR query to Authoritative
-   Nameserver, get DNS response: "xxx.foo.com" CNAME to "_.foo.com".
+   Nameserver, get subdomain wildcard response:
 
    xxx.foo.com.    600     IN  CNAME   _.foo.com.
    _.foo.com.     3600     IN  CNAME   map.bar.net.
    map.bar.net.    600     IN  A       202.38.64.10
    foo.com.      86400     IN  SWILD   _.foo.com.
 
-4.2.2.  Recursive Resolvers that support SWILD RR
-
    Recursive Resolver knows that SWILD RR is for wildcard domain on
    recursive side, marks "_.foo.com" as wildcard domains of "*.foo.com".
-   The next time, Recursive Resolver receives a "yyy.foo.com" A RR
-   query, it can directly return a wildcard CNAME as response.
+
+   In TTL time, if Recursive Resolver receives a "yyy.foo.com" A RR
+   query, it can directly return this subdomain wildcard response:
 
    yyy.foo.com.    600     IN  CNAME   _.foo.com.
    _.foo.com.     3600     IN  CNAME   map.bar.net.
    map.bar.net.    600     IN  A       202.38.64.10
    foo.com.      86400     IN  SWILD   _.foo.com.
 
-
-
-
-
-
-Pan & Fu                 Expires January 4, 2018                [Page 4]
-
-Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
-
-
-4.2.3.  Recursive Resolvers that support wildcard detect method
-
-   Recursive Resolver knows that "_" is special character for wildcard
-   domain on recursive side, and sends a "foo.com" TXT RR query to
-   Authoritative Nameserver, get DNS response: foo.com subdomain is
-   wildcard.
-
-   foo.com.      86400 IN  TXT "subdomain_wildcard: _"
-
-   Recursive Resolver marks "_.foo.com" as wildcard domains of
-   "*.foo.com".  The next time, Recursive Resolver receives a
-   "yyy.foo.com" A RR query, it can directly return a wildcard CNAME as
-   response.
-
-   yyy.foo.com.    600     IN  CNAME   _.foo.com.
-   _.foo.com.     3600     IN  CNAME   map.bar.net.
-   map.bar.net.    600     IN  A       202.38.64.10
-   foo.com.      86400     IN  TXT     "subdomain_wildcard: _"
-
-4.2.4.  Recursive Resolvers that not support neither SWILD RR nor
-        wildcard detect method
+4.2.2.  Recursive Resolvers that not support SWILD RR
 
    Recursive Resolver can deal with DNS response as usual.
 
@@ -258,6 +218,14 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
    Forwarding Resolver sends query to its next-hop Resolver is similar
    with Recursive Resolver sends query to Authoritative Nameserver.
 
+
+
+
+Pan & Fu                 Expires January 4, 2018                [Page 4]
+
+Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
+
+
 5.  DNS Cache
 
    Intermediate Nameservers' cache size can be reduced, avoid to cache
@@ -268,19 +236,12 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
 6.  DNSSEC
 
-   Clients can use DNSSEC to validate the response with the
-   Authoritative Nameserver.
+   Clients and DNSSEC-Enabled Intermediate Nameservers can use DNSSEC to
+   validate all the responses with the Authoritative Nameserver.
 
-   DNSSEC-Enabled Intermediate Nameservers that support wildcard detect
-   method can save cost, only validating the SWILD/TXT RRSIG of
-   "foo.com" and the RRSIGs of "_.foo.com".
-
-
-
-Pan & Fu                 Expires January 4, 2018                [Page 5]
-
-Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
-
+   DNSSEC-Enabled Intermediate Nameservers can only validate the SWILD
+   RRSIG of "foo.com" and the RRSIGs of "_.foo.com", not need to
+   validate the CNAME RRSIG of "yyy.foo.com".
 
 7.  Acknowledgements
 
@@ -312,6 +273,15 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
               Kumari, "Client Subnet in DNS Queries", RFC 7871, May
               2016.
 
+
+
+
+
+Pan & Fu                 Expires January 4, 2018                [Page 5]
+
+Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
+
+
    [RFC8020]  Bortzmeyer, S. and S. Huque, "NXDOMAIN: There Really Is
               Nothing Underneath", RFC 8020, Nov 2016.
 
@@ -328,14 +298,6 @@ Authors' Addresses
 
    Email: abbypan@gmail.com
    URI:   https://github.com/abbypan
-
-
-
-
-
-Pan & Fu                 Expires January 4, 2018                [Page 6]
-
-Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
 
    Yu Fu
@@ -371,22 +333,4 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Pan & Fu                 Expires January 4, 2018                [Page 7]
+Pan & Fu                 Expires January 4, 2018                [Page 6]
