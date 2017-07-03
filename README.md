@@ -1,7 +1,6 @@
 # dns_wildcard_on_intermediate_nameservers
-a wildcard detect method for Intermediate Nameservers to cache wildcard domain record
+SWILD RR Type for Intermediate Nameservers to cache wildcard domain record
 
-SWILD
+[SWILD RR Type (Wildcard on Intermediate Nameservers)](https://datatracker.ietf.org/doc/draft-pan-dnsop-swild-rr-type/)
 
-
-[Wildcard on Intermediate Nameservers](draft.txt)
+[draft.txt](draft.txt)
