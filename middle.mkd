@@ -47,7 +47,7 @@ The "target" is a subdomain of the owner, to indicate that all subdomains of the
 
 We use a special character "_" to indicate the wildcard domain configuration on Intermediate Nameservers, make all the subdomains CNAME to the "_" subdomain, and generate a SWILD RR "_".
 
-If most of Recursive Resolvers support SWILD RR in the future, the wildcard detect method can be deprecated on the Recursive Resolvers, "_" special character will be not strictly use for SWILD target.
+If most of Recursive Resolvers support SWILD RR in the future, "_" special character is not strictly used for SWILD target.
 
 Take  "*.foo.com" for example.
 
