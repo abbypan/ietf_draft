@@ -1,7 +1,7 @@
 # Introduction
 
 
-[](#RFC1034) and [](#RFC4592) describe wildcard domain name.
+[](#RFC1034) and [](#RFC4592) described wildcard domain name.
 
 Nowadays wildcard domain is globally used, especially on CDN, P2P, advertise, anti-virus, DNSBLs service.
 
@@ -39,7 +39,7 @@ Forwarding Resolver: Described in [](#RFC2308) Section 1.
 
 The presentation format of the SWILD RR is as follows:
 
-       owner ttl class ALIAS target
+       owner ttl class SWILD target
 
 The "target" is a subdomain of the owner, to indicate that all subdomains of the "owner" have the same configuration with the "target".
 

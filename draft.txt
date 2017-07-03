@@ -5,8 +5,8 @@
 Network Working Group                                             L. Pan
 Internet-Draft
 Intended status: Informational                                     Y. Fu
-Expires: November 12, 2017                                         CNNIC
-                                                            May 11, 2017
+Expires: January 4, 2018                                           CNNIC
+                                                            July 3, 2017
 
 
               Wildcard on Intermediate Nameservers (SWILD)
@@ -34,7 +34,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on November 12, 2017.
+   This Internet-Draft will expire on January 4, 2018.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Pan & Fu                Expires November 12, 2017               [Page 1]
+Pan & Fu                 Expires January 4, 2018                [Page 1]
 
-Internet-DraftWildcard on Intermediate Nameservers (SWILD)      May 2017
+Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
 
 Table of Contents
@@ -83,7 +83,7 @@ Table of Contents
 
 1.  Introduction
 
-   [RFC1034] and [RFC4592] describe wildcard domain name.
+   [RFC1034] and [RFC4592] described wildcard domain name.
 
    Nowadays wildcard domain is globally used, especially on CDN, P2P,
    advertise, anti-virus, DNSBLs service.
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Pan & Fu                Expires November 12, 2017               [Page 2]
+Pan & Fu                 Expires January 4, 2018                [Page 2]
 
-Internet-DraftWildcard on Intermediate Nameservers (SWILD)      May 2017
+Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
 
    This document specifies a new SWILD RR type and describes a wildcard
@@ -143,7 +143,7 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)      May 2017
 
    The presentation format of the SWILD RR is as follows:
 
-      owner ttl class ALIAS target
+      owner ttl class SWILD target
 
    The "target" is a subdomain of the owner, to indicate that all
    subdomains of the "owner" have the same configuration with the
@@ -165,9 +165,9 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)      May 2017
 
 
 
-Pan & Fu                Expires November 12, 2017               [Page 3]
+Pan & Fu                 Expires January 4, 2018                [Page 3]
 
-Internet-DraftWildcard on Intermediate Nameservers (SWILD)      May 2017
+Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
 
 4.1.  Authoritative Nameserver
@@ -221,9 +221,9 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)      May 2017
 
 
 
-Pan & Fu                Expires November 12, 2017               [Page 4]
+Pan & Fu                 Expires January 4, 2018                [Page 4]
 
-Internet-DraftWildcard on Intermediate Nameservers (SWILD)      May 2017
+Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
 
 4.2.3.  Recursive Resolvers that support wildcard detect method
@@ -277,9 +277,9 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)      May 2017
 
 
 
-Pan & Fu                Expires November 12, 2017               [Page 5]
+Pan & Fu                 Expires January 4, 2018                [Page 5]
 
-Internet-DraftWildcard on Intermediate Nameservers (SWILD)      May 2017
+Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
 
 7.  Acknowledgements
@@ -333,9 +333,9 @@ Authors' Addresses
 
 
 
-Pan & Fu                Expires November 12, 2017               [Page 6]
+Pan & Fu                 Expires January 4, 2018                [Page 6]
 
-Internet-DraftWildcard on Intermediate Nameservers (SWILD)      May 2017
+Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
 
    Yu Fu
@@ -389,4 +389,4 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)      May 2017
 
 
 
-Pan & Fu                Expires November 12, 2017               [Page 7]
+Pan & Fu                 Expires January 4, 2018                [Page 7]
