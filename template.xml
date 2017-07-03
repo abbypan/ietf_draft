@@ -45,8 +45,9 @@
 
         <date month="July" year="2017"/>
 
-        <area>General</area>
-        <workgroup>Network Working Group</workgroup>
+        <area>ops</area>
+        <workgroup>dnsop</workgroup>
+
         <keyword>dns</keyword>
         <keyword>wildcard</keyword>
         <keyword>CNAME</keyword>
