@@ -150,9 +150,8 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
    configuration on Intermediate Nameservers, make all the subdomains
    CNAME to the "_" subdomain, and generate a SWILD RR "_".
 
-   If most of Recursive Resolvers support SWILD RR in the future, the
-   wildcard detect method can be deprecated on the Recursive Resolvers,
-   "_" special character will be not strictly use for SWILD target.
+   If most of Recursive Resolvers support SWILD RR in the future, "_"
+   special character is not strictly used for SWILD target.
 
    Take "*.foo.com" for example.
 
@@ -162,6 +161,7 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
    o  add SWILD RR "_" to indicate subdomain wildcard.
 
+   o  configure "_.foo.com".
 
 
 
@@ -169,8 +169,6 @@ Pan & Fu                 Expires January 4, 2018                [Page 3]
 
 Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
-
-   o  configure "_.foo.com".
 
    o  make "*.foo.com" CNAME to "_.foo.com".
 
@@ -217,6 +215,8 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
    Forwarding Resolver sends query to its next-hop Resolver is similar
    with Recursive Resolver sends query to Authoritative Nameserver.
+
+
 
 
 
