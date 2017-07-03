@@ -9,8 +9,8 @@ Expires: January 4, 2018                                           CNNIC
                                                             July 3, 2017
 
 
-              Wildcard on Intermediate Nameservers (SWILD)
-           draft-pan-wildcard-on-intermediate-nameservers-00
+          SWILD RR Type (Wildcard on Intermediate Nameservers)
+                    draft-pan-dnsop-swild-rr-type-00
 
 Abstract
 
@@ -55,7 +55,7 @@ Copyright Notice
 
 Pan & Fu                 Expires January 4, 2018                [Page 1]
 
-Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
+Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
 
 
 Table of Contents
@@ -111,7 +111,7 @@ Table of Contents
 
 Pan & Fu                 Expires January 4, 2018                [Page 2]
 
-Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
+Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
 
 
    It is OPT-IN, Intermediate Nameservers can choose not to implement or
@@ -167,7 +167,7 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
 Pan & Fu                 Expires January 4, 2018                [Page 3]
 
-Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
+Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
 
 
    o  make "*.foo.com" CNAME to "_.foo.com".
@@ -223,7 +223,7 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
 Pan & Fu                 Expires January 4, 2018                [Page 4]
 
-Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
+Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
 
 
 5.  DNS Cache
@@ -279,7 +279,7 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 
 Pan & Fu                 Expires January 4, 2018                [Page 5]
 
-Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
+Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
 
 
    [RFC8020]  Bortzmeyer, S. and S. Huque, "NXDOMAIN: There Really Is
@@ -295,6 +295,8 @@ Internet-DraftWildcard on Intermediate Nameservers (SWILD)     July 2017
 Authors' Addresses
 
    Lanlan Pan
+   Beijing
+   China
 
    Email: abbypan@gmail.com
    URI:   https://github.com/abbypan
@@ -304,11 +306,9 @@ Authors' Addresses
    CNNIC
    No.4 South 4th Street, Zhongguancun
    Beijing
-   CN
+   China
 
    Email: fuyu@cnnic.cn
-
-
 
 
 

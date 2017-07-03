@@ -6,7 +6,7 @@
 <!ENTITY pandocRefinfo  PUBLIC '' 'ref.info.xml'>
 ]>
 
-<rfc category="info" docName="draft-pan-wildcard-on-intermediate-nameservers-00"  ipr="trust200902">
+<rfc category="info" docName="draft-pan-dnsop-swild-rr-type-00"  ipr="trust200902">
     
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 
@@ -18,10 +18,17 @@
 <?rfc comments="yes" ?>
 
  <front>
-        <title abbrev="Wildcard on Intermediate Nameservers (SWILD)">Wildcard on Intermediate Nameservers (SWILD)</title>
+        <title abbrev="SWILD RR Type (Wildcard on Intermediate Nameservers)">SWILD RR Type (Wildcard on Intermediate Nameservers)</title>
 
         <author initials="L." surname="Pan" fullname="Lanlan Pan">
             <address>
+                <postal>
+                    <street></street>
+                    <street></street>
+                    <city>Beijing</city> <region></region>
+                    <code></code>
+                    <country>China</country>
+                </postal>
                 <phone></phone>
                 <email>abbypan@gmail.com</email>
                 <uri>https://github.com/abbypan</uri>
@@ -36,7 +43,7 @@
                     <street></street>
                     <city>Beijing</city> <region></region>
                     <code></code>
-                    <country>CN</country>
+                    <country>China</country>
                 </postal>
                 <phone></phone>
                 <email>fuyu@cnnic.cn</email>
