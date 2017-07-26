@@ -111,6 +111,23 @@ Clients and DNSSEC-Enabled Intermediate Nameservers can use DNSSEC to validate a
 
 DNSSEC-Enabled Intermediate Nameservers can only validate the SWILD RRSIG of "foo.com" and the RRSIGs of "_.foo.com", not need to validate the CNAME RRSIG of "yyy.foo.com".
 
+## Compare to NSEC aggressiveuse wildcard
+
+[NSEC Aggressiveuse](#NSEC-Aggressiveuse) wildcard could solve similar wildcard problem:
+
+*  NSEC/NSEC3 RR: give "NOT EXIST SUBDOMAIN" information.
+*  Cached deduced wildcard: give the default wildcard RR.
+
+SWILD:
+
+*  Directly give "ALL SUBDOMAIN" information, and the default wildcard RR.
+
+SWILD is applicable even when Authoritative Nameservers don't give NSEC/NSEC3 RR.
+
+SWILD is applicable on non-validating Forwarding Resolvers.
+
 # Acknowledgements
+
+Thanks comments for Tony Finch.
 
 Thanks to all in the DNSOP, DNSPRIV and DNSEXT mailing list.

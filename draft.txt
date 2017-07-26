@@ -5,8 +5,8 @@
 dnsop                                                             L. Pan
 Internet-Draft
 Intended status: Informational                                     Y. Fu
-Expires: January 4, 2018                                           CNNIC
-                                                            July 3, 2017
+Expires: January 27, 2018                                          CNNIC
+                                                           July 26, 2017
 
 
           SWILD RR Type (Wildcard on Intermediate Nameservers)
@@ -33,7 +33,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on January 4, 2018.
+   This Internet-Draft will expire on January 27, 2018.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Pan & Fu                 Expires January 4, 2018                [Page 1]
+Pan & Fu                Expires January 27, 2018                [Page 1]
 
 Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
 
@@ -71,9 +71,10 @@ Table of Contents
      4.3.  Intermediate Nameserver: Forwarding Resolvers . . . . . .   4
    5.  DNS Cache . . . . . . . . . . . . . . . . . . . . . . . . . .   5
    6.  DNSSEC  . . . . . . . . . . . . . . . . . . . . . . . . . . .   5
+     6.1.  Compare to NSEC aggressiveuse wildcard  . . . . . . . . .   5
    7.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   5
    8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   5
-     8.1.  Normative References  . . . . . . . . . . . . . . . . . .   5
+     8.1.  Normative References  . . . . . . . . . . . . . . . . . .   6
      8.2.  Informative References  . . . . . . . . . . . . . . . . .   6
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   6
 
@@ -108,8 +109,7 @@ Table of Contents
 
 
 
-
-Pan & Fu                 Expires January 4, 2018                [Page 2]
+Pan & Fu                Expires January 27, 2018                [Page 2]
 
 Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
 
@@ -165,7 +165,7 @@ Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
 
 
 
-Pan & Fu                 Expires January 4, 2018                [Page 3]
+Pan & Fu                Expires January 27, 2018                [Page 3]
 
 Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
 
@@ -221,7 +221,7 @@ Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
 
 
 
-Pan & Fu                 Expires January 4, 2018                [Page 4]
+Pan & Fu                Expires January 27, 2018                [Page 4]
 
 Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
 
@@ -243,11 +243,44 @@ Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
    RRSIG of "foo.com" and the RRSIGs of "_.foo.com", not need to
    validate the CNAME RRSIG of "yyy.foo.com".
 
+6.1.  Compare to NSEC aggressiveuse wildcard
+
+   NSEC Aggressiveuse [NSEC-Aggressiveuse] wildcard could solve similar
+   wildcard problem:
+
+   o  NSEC/NSEC3 RR: give "NOT EXIST SUBDOMAIN" information.
+
+   o  Cached deduced wildcard: give the default wildcard RR.
+
+   SWILD:
+
+   o  Directly give "ALL SUBDOMAIN" information, and the default
+      wildcard RR.
+
+   SWILD is applicable even when Authoritative Nameservers don't give
+   NSEC/NSEC3 RR.
+
+   SWILD is applicable on non-validating Forwarding Resolvers.
+
 7.  Acknowledgements
+
+   Thanks comments for Tony Finch.
 
    Thanks to all in the DNSOP, DNSPRIV and DNSEXT mailing list.
 
 8.  References
+
+
+
+
+
+
+
+
+Pan & Fu                Expires January 27, 2018                [Page 5]
+
+Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
+
 
 8.1.  Normative References
 
@@ -273,15 +306,6 @@ Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
               Kumari, "Client Subnet in DNS Queries", RFC 7871, May
               2016.
 
-
-
-
-
-Pan & Fu                 Expires January 4, 2018                [Page 5]
-
-Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
-
-
    [RFC8020]  Bortzmeyer, S. and S. Huque, "NXDOMAIN: There Really Is
               Nothing Underneath", RFC 8020, Nov 2016.
 
@@ -292,6 +316,11 @@ Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
               Domains in Modern DNS Traffic",
               <http://ieeexplore.ieee.org/document/6903614/>.
 
+   [NSEC-Aggressiveuse]
+              "Aggressive use of DNSSEC-validated Cache",
+              <https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-
+              nsec-aggressiveuse>.
+
 Authors' Addresses
 
    Lanlan Pan
@@ -300,6 +329,13 @@ Authors' Addresses
 
    Email: abbypan@gmail.com
    URI:   https://github.com/abbypan
+
+
+
+
+Pan & Fu                Expires January 27, 2018                [Page 6]
+
+Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
 
 
    Yu Fu
@@ -333,4 +369,24 @@ Authors' Addresses
 
 
 
-Pan & Fu                 Expires January 4, 2018                [Page 6]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Pan & Fu                Expires January 27, 2018                [Page 7]

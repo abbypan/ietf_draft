@@ -11,3 +11,16 @@
     </front>
     <format type='' target='' />
 </reference>
+
+<reference anchor='NSEC-Aggressiveuse' target='https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-nsec-aggressiveuse' >
+    <front>
+        <title abbrev='nsec-aggressiveuse'>Aggressive use of DNSSEC-validated Cache</title>
+        <author initials='' surname='' fullname=''>
+            <organization></organization>
+            <address>
+                <email></email></address>
+        </author>
+        <date year='' month='' />
+    </front>
+    <format type='' target='' />
+</reference>
