@@ -1,6 +1,18 @@
 <?xml version='1.0' encoding='UTF-8'?>
 
-<reference anchor='DNSNoise' target='http://ieeexplore.ieee.org/document/6903614/' >
+<reference anchor='BankNSHijack' target='https://www.theregister.co.uk/2017/04/05/hackers_take_over_banks_dns_system/' >
+    <front>
+        <title abbrev='BankNSHijack'>Brazilians whacked: Crooks hijack bank's DNS to fleece victims</title>
+        <author initials='' surname='' fullname=''>
+            <organization></organization>
+            <address>
+                <email></email></address></author>
+        <date year='' month='' />
+    </front>
+    <format type='' target='' />
+</reference>
+
+<reference anchor='DNSNoise' target='http://astrolavos.gatech.edu/articles/dnsnoise-dsn2014.pdf' >
     <front>
         <title abbrev='DNS Noise'>DNS Noise: Measuring the Pervasiveness of Disposable Domains in Modern DNS Traffic</title>
         <author initials='' surname='' fullname=''>
@@ -12,14 +24,13 @@
     <format type='' target='' />
 </reference>
 
-<reference anchor='NSEC-Aggressiveuse' target='https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-nsec-aggressiveuse' >
+<reference anchor='McAfeeGTI' target='https://kc.mcafee.com/corporate/index?page=content&amp;id=KB53735' >
     <front>
-        <title abbrev='nsec-aggressiveuse'>Aggressive use of DNSSEC-validated Cache</title>
+        <title abbrev='McAfeeGTI'>McAfee Global Threat Intelligence (GTI) File Reputation</title>
         <author initials='' surname='' fullname=''>
             <organization></organization>
             <address>
-                <email></email></address>
-        </author>
+                <email></email></address></author>
         <date year='' month='' />
     </front>
     <format type='' target='' />

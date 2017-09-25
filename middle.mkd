@@ -1,26 +1,18 @@
 # Introduction
 
-
 [](#RFC1034) and [](#RFC4592) described wildcard domain name.
 
-Nowadays wildcard domain is globally used, especially on CDN, P2P, advertise, anti-virus, DNSBLs service.
+Nowadays wildcard domain is globally used, take "*.github.io" for example, 
 
-Take "*.github.io" for example, 
+    foo.github.io.		     3600	IN	CNAME	sni.github.map.fastly.net.
+    sni.github.map.fastly.net. 25	IN	A	    151.101.73.147
 
-    foo.github.io.		  3599	IN	CNAME	github.map.fastly.net.
-    github.map.fastly.net.	25	IN	A	    151.101.0.133
-    github.map.fastly.net.	25	IN	A	    151.101.192.133
-    github.map.fastly.net.	25	IN	A	    151.101.64.133
-    github.map.fastly.net.	25	IN	A	    151.101.128.133
+Wildcard domain is simple configured on Authoritative Nameserver, but Intermediate Nameservers have to cache various domains (xxx.github.io, yyy.github.io, ... ) of the same wildcard domain configuration, with low cache hit rate, increase cache size.
 
-Wildcard domain is simple configured on Authoritative Nameserver, but Intermediate Nameservers have to cache various domains (xxx.github.io, yyy.github.io, ... ) of the same wildcard domain configuration.
-
-Moreover, [](#DNSNoise) found that many of wildcard domains are disposable (short live time), but with low cache hit rate, increase cache size.
-
-This document specifies a new SWILD RR type for Intermediate Nameservers to cache subdomain wildcard record, in order to reduce the cache size and optimize the wildcard domain cache miss.
+This document specifies a new SWILD RR type for Intermediate Nameservers to cache subdomain wildcard record, in order to optimize the wildcard domain cache miss, reduce the cache size, and help to defense the DDoS attack.
 
 It is OPT-IN, Intermediate Nameservers can choose not to implement or enable it.
-   
+
 # Terminology
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [](#RFC2119).
@@ -45,7 +37,7 @@ The "target" is a subdomain of the owner, to indicate that all subdomains of the
 
 # Overview 
 
-We use a special character "_" to indicate the wildcard domain configuration on Intermediate Nameservers, make all the subdomains CNAME to the "_" subdomain, and generate a SWILD RR "_".
+Special character "_" to indicate the wildcard domain configuration on Intermediate Nameservers, make all the subdomains CNAME to the "_" subdomain, and generate a SWILD RR "_".
 
 If most of Recursive Resolvers support SWILD RR in the future, "_" special character is not strictly used for SWILD target.
 
@@ -101,9 +93,19 @@ Forwarding Resolver sends query to its next-hop Resolver is similar with Recursi
 
 # DNS Cache
 
-Intermediate Nameservers' cache size can be reduced, avoid to cache various domains of the same wildcard domain configuration. 
+Similar with [](#RFC8198) Section 6, SWILD can reduce latency and decrease server load:
 
 Intermediate Nameservers' cache hit rate will rise, avoid to query Authoritative Nameserver for the same wildcard domain configuration.
+
+Intermediate Nameservers' cache size can be reduced, avoid to cache various domains of the same wildcard domain configuration. 
+
+# DDoS
+
+When Recursive Servers or Second Level Domain(SLD) Authoritative Servers encounter DDoS attack, it will be better for the defense if Recursive Servers know more information.
+
+* SWILD can help Recursive Servers to make a fast correct response when the queires of important subdomain wildcards rise suddenly and sharply, on condition that the source clients are hard to be deprecated.
+
+* SWILD can help Recursive Servers to response the unvisited important subdomain wildcards queries, when the SLD Authoritative Servers encounter an accident which may cause SERVFAIL, TIMEOUT, or hijack responses.
 
 # DNSSEC
 
@@ -113,7 +115,7 @@ DNSSEC-Enabled Intermediate Nameservers can only validate the SWILD RRSIG of "fo
 
 ## Compare to NSEC aggressiveuse wildcard
 
-[NSEC Aggressiveuse](#NSEC-Aggressiveuse) wildcard could solve similar wildcard problem:
+[](#RFC8198) wildcard could solve similar wildcard problem:
 
 *  NSEC/NSEC3 RR: give "NOT EXIST SUBDOMAIN" information.
 *  Cached deduced wildcard: give the default wildcard RR.
@@ -122,12 +124,46 @@ SWILD:
 
 *  Directly give "ALL SUBDOMAIN" information, and the default wildcard RR.
 
+SWILD can work with NSEC aggressiveuse wildcard, Authoritative Servers can also return NSEC/NSEC3 RR.
+
 SWILD is applicable even when Authoritative Nameservers don't give NSEC/NSEC3 RR.
 
 SWILD is applicable on non-validating Forwarding Resolvers.
 
+## DNSSEC Deployment
+
+DNSSEC is designed to protect the integrity of DNS responses, avoid package tampering.
+
+How to encourge DNSSEC deployment is an old question, especially on important SLD Authoritative Severs such as google.com, amazon.com.
+
+Defense on domain hjiack such as [](#BankNSHijack) is the biggest motivation to deploy DNSSEC.
+
+NSEC aggressiveuse wildcard or SWILD can not make influnence on DNSSEC deployment, but they solve similar subdomain problem under different DNSSEC deployment prerequisites.
+
+## Hijack Risk
+
+There is concern that SWILD will rise the hijack risk, because it give a response on whole subdomain wildcards, but not a single subdomain.
+
+However, there is similar fatal hijack risk on NS and MX, which is configured for the whole zone.
+
+The hijack influnence of SWILD will not be larger than NS or MX.
+
+## Stub Validation
+
+SWILD does not support directly DNSSEC validation on single subdomain wildcard.
+
+Forwarding Resolvers must trigger a tranditional DNSSEC resolution if they receive a single subdomain wildcard query with DNSSEC validation option from Stub Resolvers.
+
+# Disposable Domain
+
+[](#DNSNoise) found that disposable domains are widely used by various industries, such as Anti-Virus, DNSBLs, CDN, P2P.
+
+They are software-generated subdomains with small target A RRSets, which can be summaried by wildcards for passive DNS databases.
+
+Take [](#McAfeeGTI) for example, *.avqs.mcafee.com's response is from 127.0.0.0/16 network, which is a information about the reputation of the queried file. It can be optimized with a unique NAPTR RR, which can offer an service api of the file reputation information, but not use special A RR definition.
+
 # Acknowledgements
 
-Thanks comments for Tony Finch.
+Thanks comments for Tony Finch, Petr Špaček, Matthew Pounsett, Paul Hoffman, Richard Gibson, Paul Vixie, Dave Crocker, Peter van Dijk, Mark Andrews, Vernon Schryver, Ted Lemon, Mukund Sivaraman, Mikael Abrahamsson, Ralf Weber, Davey Song, Warren Kumari.  
 
-Thanks to all in the DNSOP, DNSPRIV and DNSEXT mailing list.
+Thanks to all in the DNSOP mailing list.

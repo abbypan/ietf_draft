@@ -5,18 +5,19 @@
 dnsop                                                             L. Pan
 Internet-Draft
 Intended status: Informational                                     Y. Fu
-Expires: January 27, 2018                                          CNNIC
-                                                           July 26, 2017
+Expires: March 29, 2018                                            CNNIC
+                                                      September 25, 2017
 
 
           SWILD RR Type (Wildcard on Intermediate Nameservers)
-                    draft-pan-dnsop-swild-rr-type-00
+                    draft-pan-dnsop-swild-rr-type-01
 
 Abstract
 
-   This document describes a new SWILD RR type for Intermediate
-   Nameservers to cache subdomain wildcard record, in order to reduce
-   the cache size and optimize the wildcard domain cache miss.
+   This document specifies a new SWILD RR type for Intermediate
+   Nameservers to cache subdomain wildcard record, in order to optimize
+   the wildcard domain cache miss, reduce the cache size, and help to
+   defense the DDoS attack.
 
 Status of This Memo
 
@@ -33,7 +34,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on January 27, 2018.
+   This Internet-Draft will expire on March 29, 2018.
 
 Copyright Notice
 
@@ -52,10 +53,9 @@ Copyright Notice
 
 
 
-
-Pan & Fu                Expires January 27, 2018                [Page 1]
+Pan & Fu                 Expires March 29, 2018                 [Page 1]
 
-Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
+Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
 
 
 Table of Contents
@@ -70,52 +70,49 @@ Table of Contents
        4.2.2.  Recursive Resolvers that not support SWILD RR . . . .   4
      4.3.  Intermediate Nameserver: Forwarding Resolvers . . . . . .   4
    5.  DNS Cache . . . . . . . . . . . . . . . . . . . . . . . . . .   5
-   6.  DNSSEC  . . . . . . . . . . . . . . . . . . . . . . . . . . .   5
-     6.1.  Compare to NSEC aggressiveuse wildcard  . . . . . . . . .   5
-   7.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   5
-   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   5
-     8.1.  Normative References  . . . . . . . . . . . . . . . . . .   6
-     8.2.  Informative References  . . . . . . . . . . . . . . . . .   6
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   6
+   6.  DDoS  . . . . . . . . . . . . . . . . . . . . . . . . . . . .   5
+   7.  DNSSEC  . . . . . . . . . . . . . . . . . . . . . . . . . . .   5
+     7.1.  Compare to NSEC aggressiveuse wildcard  . . . . . . . . .   5
+     7.2.  DNSSEC Deployment . . . . . . . . . . . . . . . . . . . .   6
+     7.3.  Hijack Risk . . . . . . . . . . . . . . . . . . . . . . .   6
+     7.4.  Stub Validation . . . . . . . . . . . . . . . . . . . . .   6
+   8.  Disposable Domain . . . . . . . . . . . . . . . . . . . . . .   6
+   9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   7
+   10. References  . . . . . . . . . . . . . . . . . . . . . . . . .   7
+     10.1.  Normative References . . . . . . . . . . . . . . . . . .   7
+     10.2.  Informative References . . . . . . . . . . . . . . . . .   8
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   8
 
 1.  Introduction
 
    [RFC1034] and [RFC4592] described wildcard domain name.
 
-   Nowadays wildcard domain is globally used, especially on CDN, P2P,
-   advertise, anti-virus, DNSBLs service.
+   Nowadays wildcard domain is globally used, take "*.github.io" for
+   example,
 
-   Take "*.github.io" for example,
-
-   foo.github.io.        3599  IN  CNAME   github.map.fastly.net.
-   github.map.fastly.net.  25  IN  A       151.101.0.133
-   github.map.fastly.net.  25  IN  A       151.101.192.133
-   github.map.fastly.net.  25  IN  A       151.101.64.133
-   github.map.fastly.net.  25  IN  A       151.101.128.133
+  foo.github.io.           3600   IN  CNAME   sni.github.map.fastly.net.
+  sni.github.map.fastly.net. 25   IN  A       151.101.73.147
 
    Wildcard domain is simple configured on Authoritative Nameserver, but
    Intermediate Nameservers have to cache various domains
    (xxx.github.io, yyy.github.io, ... ) of the same wildcard domain
-   configuration.
-
-   Moreover, [DNSNoise] found that many of wildcard domains are
-   disposable (short live time), but with low cache hit rate, increase
-   cache size.
+   configuration, with low cache hit rate, increase cache size.
 
    This document specifies a new SWILD RR type for Intermediate
-   Nameservers to cache subdomain wildcard record, in order to reduce
-   the cache size and optimize the wildcard domain cache miss.
-
-
-
-
-Pan & Fu                Expires January 27, 2018                [Page 2]
-
-Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
-
+   Nameservers to cache subdomain wildcard record, in order to optimize
+   the wildcard domain cache miss, reduce the cache size, and help to
+   defense the DDoS attack.
 
    It is OPT-IN, Intermediate Nameservers can choose not to implement or
    enable it.
+
+
+
+
+Pan & Fu                 Expires March 29, 2018                 [Page 2]
+
+Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
+
 
 2.  Terminology
 
@@ -146,9 +143,9 @@ Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
 
 4.  Overview
 
-   We use a special character "_" to indicate the wildcard domain
-   configuration on Intermediate Nameservers, make all the subdomains
-   CNAME to the "_" subdomain, and generate a SWILD RR "_".
+   Special character "_" to indicate the wildcard domain configuration
+   on Intermediate Nameservers, make all the subdomains CNAME to the "_"
+   subdomain, and generate a SWILD RR "_".
 
    If most of Recursive Resolvers support SWILD RR in the future, "_"
    special character is not strictly used for SWILD target.
@@ -163,14 +160,15 @@ Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
 
    o  configure "_.foo.com".
 
-
-
-Pan & Fu                Expires January 27, 2018                [Page 3]
-
-Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
-
-
    o  make "*.foo.com" CNAME to "_.foo.com".
+
+
+
+
+Pan & Fu                 Expires March 29, 2018                 [Page 3]
+
+Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
+
 
    Note that, there is not any other subdomain configured in the
    "foo.com" zone except "_.foo.com".
@@ -221,20 +219,41 @@ Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
 
 
 
-Pan & Fu                Expires January 27, 2018                [Page 4]
+
+
+Pan & Fu                 Expires March 29, 2018                 [Page 4]
 
-Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
+Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
 
 
 5.  DNS Cache
 
-   Intermediate Nameservers' cache size can be reduced, avoid to cache
-   various domains of the same wildcard domain configuration.
+   Similar with [RFC8198] Section 6, SWILD can reduce latency and
+   decrease server load:
 
    Intermediate Nameservers' cache hit rate will rise, avoid to query
    Authoritative Nameserver for the same wildcard domain configuration.
 
-6.  DNSSEC
+   Intermediate Nameservers' cache size can be reduced, avoid to cache
+   various domains of the same wildcard domain configuration.
+
+6.  DDoS
+
+   When Recursive Servers or Second Level Domain(SLD) Authoritative
+   Servers encounter DDoS attack, it will be better for the defense if
+   Recursive Servers know more information.
+
+   o  SWILD can help Recursive Servers to make a fast correct response
+      when the queires of important subdomain wildcards rise suddenly
+      and sharply, on condition that the source clients are hard to be
+      deprecated.
+
+   o  SWILD can help Recursive Servers to response the unvisited
+      important subdomain wildcards queries, when the SLD Authoritative
+      Servers encounter an accident which may cause SERVFAIL, TIMEOUT,
+      or hijack responses.
+
+7.  DNSSEC
 
    Clients and DNSSEC-Enabled Intermediate Nameservers can use DNSSEC to
    validate all the responses with the Authoritative Nameserver.
@@ -243,10 +262,9 @@ Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
    RRSIG of "foo.com" and the RRSIGs of "_.foo.com", not need to
    validate the CNAME RRSIG of "yyy.foo.com".
 
-6.1.  Compare to NSEC aggressiveuse wildcard
+7.1.  Compare to NSEC aggressiveuse wildcard
 
-   NSEC Aggressiveuse [NSEC-Aggressiveuse] wildcard could solve similar
-   wildcard problem:
+   [RFC8198] wildcard could solve similar wildcard problem:
 
    o  NSEC/NSEC3 RR: give "NOT EXIST SUBDOMAIN" information.
 
@@ -257,32 +275,90 @@ Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
    o  Directly give "ALL SUBDOMAIN" information, and the default
       wildcard RR.
 
+
+
+Pan & Fu                 Expires March 29, 2018                 [Page 5]
+
+Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
+
+
+   SWILD can work with NSEC aggressiveuse wildcard, Authoritative
+   Servers can also return NSEC/NSEC3 RR.
+
    SWILD is applicable even when Authoritative Nameservers don't give
    NSEC/NSEC3 RR.
 
    SWILD is applicable on non-validating Forwarding Resolvers.
 
-7.  Acknowledgements
+7.2.  DNSSEC Deployment
 
-   Thanks comments for Tony Finch.
+   DNSSEC is designed to protect the integrity of DNS responses, avoid
+   package tampering.
 
-   Thanks to all in the DNSOP, DNSPRIV and DNSEXT mailing list.
+   How to encourge DNSSEC deployment is an old question, especially on
+   important SLD Authoritative Severs such as google.com, amazon.com.
 
-8.  References
+   Defense on domain hjiack such as [BankNSHijack] is the biggest
+   motivation to deploy DNSSEC.
+
+   NSEC aggressiveuse wildcard or SWILD can not make influnence on
+   DNSSEC deployment, but they solve similar subdomain problem under
+   different DNSSEC deployment prerequisites.
+
+7.3.  Hijack Risk
+
+   There is concern that SWILD will rise the hijack risk, because it
+   give a response on whole subdomain wildcards, but not a single
+   subdomain.
+
+   However, there is similar fatal hijack risk on NS and MX, which is
+   configured for the whole zone.
+
+   The hijack influnence of SWILD will not be larger than NS or MX.
+
+7.4.  Stub Validation
+
+   SWILD does not support directly DNSSEC validation on single subdomain
+   wildcard.
+
+   Forwarding Resolvers must trigger a tranditional DNSSEC resolution if
+   they receive a single subdomain wildcard query with DNSSEC validation
+   option from Stub Resolvers.
+
+8.  Disposable Domain
+
+   [DNSNoise] found that disposable domains are widely used by various
+   industries, such as Anti-Virus, DNSBLs, CDN, P2P.
 
 
 
 
-
-
-
-
-Pan & Fu                Expires January 27, 2018                [Page 5]
+Pan & Fu                 Expires March 29, 2018                 [Page 6]
 
-Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
+Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
 
 
-8.1.  Normative References
+   They are software-generated subdomains with small target A RRSets,
+   which can be summaried by wildcards for passive DNS databases.
+
+   Take [McAfeeGTI] for example, *.avqs.mcafee.com's response is from
+   127.0.0.0/16 network, which is a information about the reputation of
+   the queried file.  It can be optimized with a unique NAPTR RR, which
+   can offer an service api of the file reputation information, but not
+   use special A RR definition.
+
+9.  Acknowledgements
+
+   Thanks comments for Tony Finch, Petr &#352;pa&#269;ek, Matthew
+   Pounsett, Paul Hoffman, Richard Gibson, Paul Vixie, Dave Crocker,
+   Peter van Dijk, Mark Andrews, Vernon Schryver, Ted Lemon, Mukund
+   Sivaraman, Mikael Abrahamsson, Ralf Weber, Davey Song, Warren Kumari.
+
+   Thanks to all in the DNSOP mailing list.
+
+10.  References
+
+10.1.  Normative References
 
    [RFC1034]  Mockapetris, P., "Domain Names - Concepts and Facilities",
               RFC 1034, November 1987.
@@ -309,17 +385,35 @@ Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
    [RFC8020]  Bortzmeyer, S. and S. Huque, "NXDOMAIN: There Really Is
               Nothing Underneath", RFC 8020, Nov 2016.
 
-8.2.  Informative References
+
+
+
+
+Pan & Fu                 Expires March 29, 2018                 [Page 7]
+
+Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
+
+
+   [RFC8198]  Fujiwara, K., Kato, A., and W. Kumari, "Aggressive Use of
+              DNSSEC-Validated Cache", RFC 8198, July 2017.
+
+10.2.  Informative References
+
+   [BankNSHijack]
+              "Brazilians whacked: Crooks hijack bank's DNS to fleece
+              victims", <https://www.theregister.co.uk/2017/04/05/
+              hackers_take_over_banks_dns_system/>.
 
    [DNSNoise]
               "DNS Noise: Measuring the Pervasiveness of Disposable
               Domains in Modern DNS Traffic",
-              <http://ieeexplore.ieee.org/document/6903614/>.
+              <http://astrolavos.gatech.edu/articles/
+              dnsnoise-dsn2014.pdf>.
 
-   [NSEC-Aggressiveuse]
-              "Aggressive use of DNSSEC-validated Cache",
-              <https://datatracker.ietf.org/doc/html/draft-ietf-dnsop-
-              nsec-aggressiveuse>.
+   [McAfeeGTI]
+              "McAfee Global Threat Intelligence (GTI) File Reputation",
+              <https://kc.mcafee.com/corporate/
+              index?page=content&id=KB53735>.
 
 Authors' Addresses
 
@@ -329,13 +423,6 @@ Authors' Addresses
 
    Email: abbypan@gmail.com
    URI:   https://github.com/abbypan
-
-
-
-
-Pan & Fu                Expires January 27, 2018                [Page 6]
-
-Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
 
 
    Yu Fu
@@ -358,35 +445,4 @@ Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserve  July 2017
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Pan & Fu                Expires January 27, 2018                [Page 7]
+Pan & Fu                 Expires March 29, 2018                 [Page 8]

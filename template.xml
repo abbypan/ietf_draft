@@ -4,9 +4,10 @@
 
 <!ENTITY pandocRefnorm  PUBLIC '' 'ref.norm.xml'>
 <!ENTITY pandocRefinfo  PUBLIC '' 'ref.info.xml'>
+
 ]>
 
-<rfc category="info" docName="draft-pan-dnsop-swild-rr-type-00"  ipr="trust200902">
+<rfc category="info" docName="draft-pan-dnsop-swild-rr-type-01"  ipr="trust200902">
     
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
 
@@ -50,7 +51,7 @@
             </address>
         </author>
 
-        <date month="July" year="2017"/>
+        <date month="Sep" year="2017"/>
 
         <area>ops</area>
         <workgroup>dnsop</workgroup>
@@ -63,9 +64,7 @@
         <keyword>forwarding</keyword>
         <keyword>resolver</keyword>
         <abstract>
-<t>
-This document describes a new SWILD RR type for Intermediate Nameservers to cache subdomain wildcard record, in order to reduce the cache size and optimize the wildcard domain cache miss.
-</t>
+<t>This document specifies a new SWILD RR type for Intermediate Nameservers to cache subdomain wildcard record, in order to optimize the wildcard domain cache miss, reduce the cache size, and help to defense the DDoS attack.</t>
         </abstract>
 </front>
 
