@@ -140,6 +140,8 @@ Defense on domain hjiack such as [](#BankNSHijack) is the biggest motivation to 
 
 NSEC aggressiveuse wildcard or SWILD can not make influnence on DNSSEC deployment, but they solve similar subdomain problem under different DNSSEC deployment prerequisites.
 
+NSEC aggressiveuse wildcard should be dealed more carefully, to avoid flaws such as [](#CVE-2017-15105).
+
 ## Hijack Risk
 
 There is concern that SWILD will rise the hijack risk, because it give a response on whole subdomain wildcards, but not a single subdomain.

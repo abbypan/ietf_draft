@@ -35,3 +35,15 @@
     </front>
     <format type='' target='' />
 </reference>
+
+<reference anchor='CVE-2017-15105' target='https://nvd.nist.gov/vuln/detail/CVE-2017-15105' >
+    <front>
+        <title abbrev='CVE-2017-15105'>An improperly validated wildcard NSEC record</title>
+        <author initials='' surname='' fullname=''>
+            <organization></organization>
+            <address>
+                <email></email></address></author>
+        <date year='' month='' />
+    </front>
+    <format type='' target='' />
+</reference>

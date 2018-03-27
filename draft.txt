@@ -5,12 +5,12 @@
 dnsop                                                             L. Pan
 Internet-Draft
 Intended status: Informational                                     Y. Fu
-Expires: March 29, 2018                                            CNNIC
-                                                      September 25, 2017
+Expires: September 28, 2018                                        CNNIC
+                                                          March 27, 2018
 
 
           SWILD RR Type (Wildcard on Intermediate Nameservers)
-                    draft-pan-dnsop-swild-rr-type-01
+                    draft-pan-dnsop-swild-rr-type-02
 
 Abstract
 
@@ -34,11 +34,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on March 29, 2018.
+   This Internet-Draft will expire on September 28, 2018.
 
 Copyright Notice
 
-   Copyright (c) 2017 IETF Trust and the persons identified as the
+   Copyright (c) 2018 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Pan & Fu                 Expires March 29, 2018                 [Page 1]
+Pan & Fu               Expires September 28, 2018               [Page 1]
 
-Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
+Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserv  March 2018
 
 
 Table of Contents
@@ -76,7 +76,7 @@ Table of Contents
      7.2.  DNSSEC Deployment . . . . . . . . . . . . . . . . . . . .   6
      7.3.  Hijack Risk . . . . . . . . . . . . . . . . . . . . . . .   6
      7.4.  Stub Validation . . . . . . . . . . . . . . . . . . . . .   6
-   8.  Disposable Domain . . . . . . . . . . . . . . . . . . . . . .   6
+   8.  Disposable Domain . . . . . . . . . . . . . . . . . . . . . .   7
    9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   7
    10. References  . . . . . . . . . . . . . . . . . . . . . . . . .   7
      10.1.  Normative References . . . . . . . . . . . . . . . . . .   7
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Pan & Fu                 Expires March 29, 2018                 [Page 2]
+Pan & Fu               Expires September 28, 2018               [Page 2]
 
-Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
+Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserv  March 2018
 
 
 2.  Terminology
@@ -165,9 +165,9 @@ Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
 
 
 
-Pan & Fu                 Expires March 29, 2018                 [Page 3]
+Pan & Fu               Expires September 28, 2018               [Page 3]
 
-Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
+Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserv  March 2018
 
 
    Note that, there is not any other subdomain configured in the
@@ -221,9 +221,9 @@ Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
 
 
 
-Pan & Fu                 Expires March 29, 2018                 [Page 4]
+Pan & Fu               Expires September 28, 2018               [Page 4]
 
-Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
+Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserv  March 2018
 
 
 5.  DNS Cache
@@ -277,9 +277,9 @@ Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
 
 
 
-Pan & Fu                 Expires March 29, 2018                 [Page 5]
+Pan & Fu               Expires September 28, 2018               [Page 5]
 
-Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
+Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserv  March 2018
 
 
    SWILD can work with NSEC aggressiveuse wildcard, Authoritative
@@ -305,6 +305,9 @@ Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
    DNSSEC deployment, but they solve similar subdomain problem under
    different DNSSEC deployment prerequisites.
 
+   NSEC aggressiveuse wildcard should be dealed more carefully, to avoid
+   flaws such as [CVE-2017-15105].
+
 7.3.  Hijack Risk
 
    There is concern that SWILD will rise the hijack risk, because it
@@ -325,18 +328,20 @@ Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
    they receive a single subdomain wildcard query with DNSSEC validation
    option from Stub Resolvers.
 
+
+
+
+
+
+Pan & Fu               Expires September 28, 2018               [Page 6]
+
+Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserv  March 2018
+
+
 8.  Disposable Domain
 
    [DNSNoise] found that disposable domains are widely used by various
    industries, such as Anti-Virus, DNSBLs, CDN, P2P.
-
-
-
-
-Pan & Fu                 Expires March 29, 2018                 [Page 6]
-
-Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
-
 
    They are software-generated subdomains with small target A RRSets,
    which can be summaried by wildcards for passive DNS databases.
@@ -382,17 +387,15 @@ Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
               Kumari, "Client Subnet in DNS Queries", RFC 7871, May
               2016.
 
+
+
+Pan & Fu               Expires September 28, 2018               [Page 7]
+
+Internet-DraSWILD RR Type (Wildcard on Intermediate Nameserv  March 2018
+
+
    [RFC8020]  Bortzmeyer, S. and S. Huque, "NXDOMAIN: There Really Is
               Nothing Underneath", RFC 8020, Nov 2016.
-
-
-
-
-
-Pan & Fu                 Expires March 29, 2018                 [Page 7]
-
-Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
-
 
    [RFC8198]  Fujiwara, K., Kato, A., and W. Kumari, "Aggressive Use of
               DNSSEC-Validated Cache", RFC 8198, July 2017.
@@ -403,6 +406,10 @@ Internet-DraftSWILD RR Type (Wildcard on Intermediate NameSeptember 2017
               "Brazilians whacked: Crooks hijack bank's DNS to fleece
               victims", <https://www.theregister.co.uk/2017/04/05/
               hackers_take_over_banks_dns_system/>.
+
+   [CVE-2017-15105]
+              "An improperly validated wildcard NSEC record",
+              <https://nvd.nist.gov/vuln/detail/CVE-2017-15105>.
 
    [DNSNoise]
               "DNS Noise: Measuring the Pervasiveness of Disposable
@@ -438,11 +445,4 @@ Authors' Addresses
 
 
 
-
-
-
-
-
-
-
-Pan & Fu                 Expires March 29, 2018                 [Page 8]
+Pan & Fu               Expires September 28, 2018               [Page 8]
