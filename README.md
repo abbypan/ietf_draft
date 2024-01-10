@@ -1,7 +1,17 @@
-# dns_swild_rr
+# Explicit Forged Answer Signal
 
-SWILD RR Type for Intermediate Nameservers to cache wildcard domain record
+latest: [draft.html](draft-pan-dnsop-explicit-forged-answer-signal/draft.html)
 
-[SWILD RR Type (Wildcard on Intermediate Nameservers)](https://datatracker.ietf.org/doc/draft-pan-dnsop-swild-rr-type/)
+ietf: [draft-pan-dnsop-explicit-forged-answer-signal](https://datatracker.ietf.org/doc/draft-pan-dnsop-explicit-forged-answer-signal/)
 
-[draft.txt](draft.txt)
+# ISP Location in DNS Queries
+
+latest: [draft.txt](draft-pan-dnsop-edns-isp-location/draft.txt)
+
+ietf: [draft-pan-dnsop-edns-isp-location](https://datatracker.ietf.org/doc/draft-pan-dnsop-edns-isp-location/)
+
+# SWILD RR Type (Wildcard on Intermediate Nameservers)
+
+latest: [draft.txt](draft-pan-dnsop-swild-rr-type/draft.txt)
+
+ietf: [draft-pan-dnsop-swild-rr-type](https://datatracker.ietf.org/doc/draft-pan-dnsop-swild-rr-type/)
