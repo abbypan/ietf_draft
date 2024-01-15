@@ -1,0 +1,2359 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>ISP Location in DNS Queries</title>
+<meta content="Lanlan Pan" name="author">
+<meta content="Yu Fu" name="author">
+<meta content="Cuicui Wang" name="author">
+<meta content="
+       Nowadays, many authoritative servers support GeoIP feature, 
+they guess the client's geolocation by the client subnet of EDNS Client Subnet (ECS) or by the source IP address of DNS query, return tailor DNS response based on the client's geolocation. 
+However, ECS raises some privacy concerns because it leaks client subnet information on the resolution path to the authoritative server. 
+       This document describes an improved GeoIP solution,
+defines an EDNS ISP Location (EIL) extension to address the privacy problem of ECS, 
+tries to find the right balance between privacy improvement and user experience optimization. 
+       EIL is defined to convey isp location &lt; COUNTRY, AREA, ISP &gt; information that is relevant to the DNS message. 
+It will directly provide sufficient information for the GeoIP-enabled authoritative server as ECS, decide the response without guessing client's geolocation. 
+    " name="description">
+<meta content="xml2rfc 3.18.0" name="generator">
+<meta content="Internet-Draft" name="keyword">
+<meta content="draft-pan-dnsop-edns-isp-location-05" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.18.0
+    Python 3.11.6
+    ConfigArgParse 1.5.5
+    google-i18n-address 3.1.0
+    intervaltree 3.1.0
+    Jinja2 3.1.2
+    lxml 5.1.0
+    platformdirs 4.1.0
+    pycountry 22.3.5
+    PyYAML 6.0.1
+    requests 2.31.0
+    setuptools 69.0.3
+    six 1.16.0
+    wcwidth 0.2.12
+-->
+<link href="draft.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">/*
+
+  NOTE: Changes at the bottom of this file overrides some earlier settings.
+
+  Once the style has stabilized and has been adopted as an official RFC style,
+  this can be consolidated so that style settings occur only in one place, but
+  for now the contents of this file consists first of the initial CSS work as
+  provided to the RFC Formatter (xml2rfc) work, followed by itemized and
+  commented changes found necessary during the development of the v3
+  formatters.
+
+*/
+
+/* fonts */
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans'); /* Sans-serif */
+@import url('https://fonts.googleapis.com/css?family=Noto+Serif'); /* Serif (print) */
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono'); /* Monospace */
+
+:root {
+  --font-sans: 'Noto Sans', Arial, Helvetica, sans-serif;
+  --font-serif: 'Noto Serif', 'Times', 'Times New Roman', serif;
+  --font-mono: 'Roboto Mono', Courier, 'Courier New', monospace;
+}
+
+@viewport {
+  zoom: 1.0;
+}
+@-ms-viewport {
+  width: extend-to-zoom;
+  zoom: 1.0;
+}
+/* general and mobile first */
+html {
+}
+body {
+  max-width: 90%;
+  margin: 1.5em auto;
+  color: #222;
+  background-color: #fff;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  scroll-behavior: smooth;
+  overflow-wrap: break-word;
+}
+.ears {
+  display: none;
+}
+
+/* headings */
+#title, h1, h2, h3, h4, h5, h6 {
+  margin: 1em 0 0.5em;
+  font-weight: bold;
+  line-height: 1.3;
+}
+#title {
+  clear: both;
+  border-bottom: 1px solid #ddd;
+  margin: 0 0 0.5em 0;
+  padding: 1em 0 0.5em;
+}
+.author {
+  padding-bottom: 4px;
+}
+h1 {
+  font-size: 26px;
+  margin: 1em 0;
+}
+h2 {
+  font-size: 22px;
+  margin-top: -20px;  /* provide offset for in-page anchors */
+  padding-top: 33px;
+}
+h3 {
+  font-size: 18px;
+  margin-top: -36px;  /* provide offset for in-page anchors */
+  padding-top: 42px;
+}
+h4 {
+  font-size: 16px;
+  margin-top: -36px;  /* provide offset for in-page anchors */
+  padding-top: 42px;
+}
+h5, h6 {
+  font-size: 14px;
+}
+#n-copyright-notice {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 1em;
+  margin-bottom: 1em;
+}
+/* general structure */
+p {
+  padding: 0;
+  margin: 0 0 1em 0;
+  text-align: left;
+}
+div, span {
+  position: relative;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  padding: 1em 1em 0;
+  margin-bottom: 1.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+svg[font-family~="serif" i], svg [font-family~="serif" i] {
+  font-family: var(--font-serif);
+}
+svg[font-family~="sans-serif" i], svg [font-family~="sans-serif" i] {
+  font-family: var(--font-sans);
+}
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  padding: 1em 1em 0;
+  margin-bottom: 1.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  display: table;
+  border: none;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 1em 2em;
+}
+ol ol, ul ul, ol ul, ul ol {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+ul.ulBare, li.ulBare {
+  margin-left: 0em !important;
+}
+ul.compact, .ulCompact,
+ol.compact, .olCompact {
+  line-height: 100%;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+}
+dl > dt {
+  float: left;
+  margin-right: 1em;
+}
+/* 
+dl.nohang > dt {
+  float: none;
+}
+*/
+dl > dd {
+  margin-bottom: .8em;
+  min-height: 1.3em;
+}
+dl.compact > dd, .dlCompact > dd {
+  margin-bottom: 0em;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0em;
+}
+
+/* links */
+a {
+  text-decoration: none;
+}
+a[href] {
+  color: #22e; /* Arlen: WCAG 2019 */
+}
+a[href]:hover {
+  background-color: #f2f2f2;
+}
+figcaption a[href],
+a[href].selfRef,
+.iref + a[href].internal {
+  color: #222;
+}
+/* XXX probably not this:
+a.selfRef:hover {
+  background-color: transparent;
+  cursor: default;
+} */
+
+/* Figures */
+tt, code, pre {
+  background-color: #f9f9f9;
+  font-family: var(--font-mono);
+}
+pre {
+  border: 1px solid #eee;
+  margin: 0;
+  padding: 1em;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption {
+  font-style: italic;
+  margin: 0 0 1em 0;
+}
+@media screen {
+  pre {
+    overflow-x: auto;
+    max-width: 100%;
+    max-width: calc(100% - 22px);
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 1.2em 2em;
+}
+blockquote {
+  background-color: #f9f9f9;
+  color: #111; /* Arlen: WCAG 2019 */
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  border: 1px solid #eee;
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.5em 0.75em;
+}
+th {
+  text-align: left;
+  background-color: #e9e9e9;
+}
+tr:nth-child(2n+1) > td {
+  background-color: #f5f5f5;
+}
+table caption {
+  font-style: italic;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+table p {
+  /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
+     be allowed within tables more generally, it would be far better to select on a class. */
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  color: #666; /* Arlen: AHDJ 2019 */
+  text-decoration: none;
+  visibility: hidden;
+  user-select: none;
+  -ms-user-select: none;
+  -o-user-select:none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+@media screen {
+  aside:hover > a.pilcrow,
+  p:hover > a.pilcrow,
+  blockquote:hover > a.pilcrow,
+  div:hover > a.pilcrow,
+  li:hover > a.pilcrow,
+  pre:hover > a.pilcrow {
+    visibility: visible;
+  }
+  a.pilcrow:hover {
+    background-color: transparent;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid #eee;
+}
+.bcp14 {
+  font-variant: small-caps;
+}
+
+.role {
+  font-variant: all-small-caps;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: 0.9em;
+}
+#identifiers dt {
+  width: 3em;
+  clear: left;
+}
+#identifiers dd {
+  float: left;
+  margin-bottom: 0;
+}
+/* Fix PDF info block run off issue */
+@media print {
+  #identifiers dd {
+    float: none;
+  }
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #666; /* Arlen: WCAG 2019 */
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc  {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+nav.toc ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+nav.toc li {
+  line-height: 1.3em;
+  margin: 0.75em 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 7em;
+}
+.references dd {
+  margin-left: 8em;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+.index ul {
+  margin: 0 0 0 1em;
+  padding: 0;
+  list-style: none;
+}
+.index ul ul {
+  margin: 0;
+}
+.index li {
+  margin: 0;
+  text-indent: -2em;
+  padding-left: 2em;
+  padding-bottom: 5px;
+}
+.indexIndex {
+  margin: 0.5em 0 1em;
+}
+.index a {
+  font-weight: 700;
+}
+/* make the index two-column on all but the smallest screens */
+@media (min-width: 600px) {
+  .index ul {
+    -moz-column-count: 2;
+    -moz-column-gap: 20px;
+  }
+  .index ul ul {
+    -moz-column-count: 1;
+    -moz-column-gap: 0;
+  }
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  font-family: var(--font-sans);
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+
+/* temporary notes */
+.rfcEditorRemove::before {
+  position: absolute;
+  top: 0.2em;
+  right: 0.2em;
+  padding: 0.2em;
+  content: "The RFC Editor will remove this note";
+  color: #9e2a00; /* Arlen: WCAG 2019 */
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+}
+.rfcEditorRemove {
+  position: relative;
+  padding-top: 1.8em;
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+  border-radius: 3px;
+}
+.cref {
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 1023px) {
+  body {
+    padding-top: 2em;
+  }
+  #title {
+    padding: 1em 0;
+  }
+  h1 {
+    font-size: 24px;
+  }
+  h2 {
+    font-size: 20px;
+    margin-top: -18px;  /* provide offset for in-page anchors */
+    padding-top: 38px;
+  }
+  #identifiers dd {
+    max-width: 60%;
+  }
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    background-color: inherit;
+    border-bottom: 1px solid #ccc;
+  }
+  #toc h2 {
+    margin: -1px 0 0 0;
+    padding: 4px 0 4px 6px;
+    padding-right: 1em;
+    min-width: 190px;
+    font-size: 1.1em;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 6px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 1024px) {
+  body {
+    max-width: 724px;
+    margin: 42px auto;
+    padding-left: 1.5em;
+    padding-right: 29em;
+  }
+  #toc {
+    position: fixed;
+    top: 42px;
+    right: 42px;
+    width: 25%;
+    margin: 0;
+    padding: 0 1em;
+    z-index: 1;
+  }
+  #toc h2 {
+    border-top: none;
+    border-bottom: 1px solid #ddd;
+    font-size: 1em;
+    font-weight: normal;
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 0;
+    overflow: auto;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre {
+    page-break-inside: avoid;
+  }
+  figure {
+    overflow: scroll;
+  }
+  .breakable pre {
+    break-inside: auto;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  h2+*, h3+*, h4+*, h5+*, h6+* {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+/* This is commented out here, as the string-set: doesn't
+   pass W3C validation currently */
+/*
+.ears thead .left {
+  string-set: ears-top-left content();
+}
+
+.ears thead .center {
+  string-set: ears-top-center content();
+}
+
+.ears thead .right {
+  string-set: ears-top-right content();
+}
+
+.ears tfoot .left {
+  string-set: ears-bottom-left content();
+}
+
+.ears tfoot .center {
+  string-set: ears-bottom-center content();
+}
+
+.ears tfoot .right {
+  string-set: ears-bottom-right content();
+}
+*/
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+  /* The following is commented out here, but set appropriately by in code, as
+     the content depends on the document */
+  /*
+  @top-left {
+    content: 'Internet-Draft';
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-left {
+    content: string(ears-top-left);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-center {
+    content: string(ears-top-center);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-right {
+    content: string(ears-top-right);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @bottom-left {
+    content: string(ears-bottom-left);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-center {
+    content: string(ears-bottom-center);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-right {
+      content: '[Page ' counter(page) ']';
+      vertical-align: top;
+      border-top: solid 1px #ccc;
+  }
+  */
+
+}
+
+/* Changes introduced to fix issues found during implementation */
+/* Make sure links are clickable even if overlapped by following H* */
+a {
+  z-index: 2;
+}
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Leave room in document info to show Internet-Draft on one line */
+#identifiers dt {
+  width: 8em;
+}
+
+/* Don't waste quite as much whitespace between label and value in doc info */
+#identifiers dd {
+  margin-left: 1em;
+}
+
+/* Give floating toc a background color (needed when it's a div inside section */
+#toc {
+  background-color: white;
+}
+
+/* Make the collapsed ToC header render white on gray also when it's a link */
+@media screen and (max-width: 1023px) {
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+}
+
+/* Give the bottom of the ToC some whitespace */
+@media screen and (min-width: 1024px) {
+  #toc {
+    padding: 0 0 1em 1em;
+  }
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* prevent monospace from becoming overly large */
+tt, code, pre {
+  font-size: 95%;
+}
+
+/* Fix the height/width aspect for ascii art*/
+.sourcecode pre,
+.art-text pre {
+  line-height: 1.12;
+}
+
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin-right: 0.5em;
+}
+
+/* Fix the dl styling to match the RFC 7992 attributes */
+dl > dt,
+dl.dlParallel > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+
+/* Provide styling for table cell text alignment */
+table td.text-left,
+table th.text-left {
+  text-align: left;
+}
+table td.text-center,
+table th.text-center {
+  text-align: center;
+}
+table td.text-right,
+table th.text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 30em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Provide table alignment support.  We can't use the alignX classes above
+   since they do unwanted things with caption and other styling. */
+table.right {
+ margin-left: auto;
+ margin-right: 0;
+}
+table.center {
+ margin-left: auto;
+ margin-right: auto;
+}
+table.left {
+ margin-left: 0;
+ margin-right: auto;
+}
+
+/* Give the table caption label the same styling as the figcaption */
+caption a[href] {
+  color: #222;
+}
+
+@media print {
+  .toplink {
+    display: none;
+  }
+
+  /* avoid overwriting the top border line with the ToC header */
+  #toc {
+    padding-top: 1px;
+  }
+
+  /* Avoid page breaks inside dl and author address entries */
+  .vcard {
+    page-break-inside: avoid;
+  }
+
+}
+/* Tweak the bcp14 keyword presentation */
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+/* Tweak the invisible space above H* in order not to overlay links in text above */
+ h2 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 31px;
+ }
+ h3 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 24px;
+ }
+ h4 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 24px;
+ }
+/* Float artwork pilcrow to the right */
+@media screen {
+  .artwork a.pilcrow {
+    display: block;
+    line-height: 0.7;
+    margin-top: 0.15em;
+  }
+}
+/* Make pilcrows on dd visible */
+@media screen {
+  dd:hover > a.pilcrow {
+    visibility: visible;
+  }
+}
+/* Make the placement of figcaption match that of a table's caption
+   by removing the figure's added bottom margin */
+.alignLeft.art-text,
+.alignCenter.art-text,
+.alignRight.art-text {
+   margin-bottom: 0;
+}
+.alignLeft,
+.alignCenter,
+.alignRight {
+  margin: 1em 0 0 0;
+}
+/* In print, the pilcrow won't show on hover, so prevent it from taking up space,
+   possibly even requiring a new line */
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+/* Styling for the external metadata */
+div#external-metadata {
+  background-color: #eee;
+  padding: 0.5em;
+  margin-bottom: 0.5em;
+  display: none;
+}
+div#internal-metadata {
+  padding: 0.5em;                       /* to match the external-metadata padding */
+}
+/* Styling for title RFC Number */
+h1#rfcnum {
+  clear: both;
+  margin: 0 0 -1em;
+  padding: 1em 0 0 0;
+}
+/* Make .olPercent look the same as <ol><li> */
+dl.olPercent > dd {
+  margin-bottom: 0.25em;
+  min-height: initial;
+}
+/* Give aside some styling to set it apart */
+aside {
+  border-left: 1px solid #ddd;
+  margin: 1em 0 1em 2em;
+  padding: 0.2em 2em;
+}
+aside > dl,
+aside > ol,
+aside > ul,
+aside > table,
+aside > p {
+  margin-bottom: 0.5em;
+}
+/* Additional page break settings */
+@media print {
+  figcaption, table caption {
+    page-break-before: avoid;
+  }
+}
+/* Font size adjustments for print */
+@media print {
+  body  { font-size: 10pt;      line-height: normal; max-width: 96%; }
+  h1    { font-size: 1.72em;    padding-top: 1.5em; } /* 1*1.2*1.2*1.2 */
+  h2    { font-size: 1.44em;    padding-top: 1.5em; } /* 1*1.2*1.2 */
+  h3    { font-size: 1.2em;     padding-top: 1.5em; } /* 1*1.2 */
+  h4    { font-size: 1em;       padding-top: 1.5em; }
+  h5, h6 { font-size: 1em;      margin: initial; padding: 0.5em 0 0.3em; }
+}
+/* Sourcecode margin in print, when there's no pilcrow */
+@media print {
+  .artwork,
+  .artwork > pre,
+  .sourcecode {
+    margin-bottom: 1em;
+  }
+}
+/* Avoid narrow tables forcing too narrow table captions, which may render badly */
+table {
+  min-width: 20em;
+}
+/* ol type a */
+ol.type-a { list-style-type: lower-alpha; }
+ol.type-A { list-style-type: upper-alpha; }
+ol.type-i { list-style-type: lower-roman; }
+ol.type-I { list-style-type: lower-roman; }
+/* Apply the print table and row borders in general, on request from the RPC,
+and increase the contrast between border and odd row background slightly */
+table {
+  border: 1px solid #ddd;
+}
+td {
+  border-top: 1px solid #ddd;
+}
+tr {
+  break-inside: avoid;
+}
+tr:nth-child(2n+1) > td {
+  background-color: #f8f8f8;
+}
+/* Use style rules to govern display of the TOC. */
+@media screen and (max-width: 1023px) {
+  #toc nav { display: none; }
+  #toc.active nav { display: block; }
+}
+/* Add support for keepWithNext */
+.keepWithNext {
+  break-after: avoid-page;
+  break-after: avoid-page;
+}
+/* Add support for keepWithPrevious */
+.keepWithPrevious {
+  break-before: avoid-page;
+}
+/* Change the approach to avoiding breaks inside artwork etc. */
+figure, pre, table, .artwork, .sourcecode  {
+  break-before: auto;
+  break-after: auto;
+}
+/* Avoid breaks between <dt> and <dd> */
+dl {
+  break-before: auto;
+  break-inside: auto;
+}
+dt {
+  break-before: auto;
+  break-after: avoid-page;
+}
+dd {
+  break-before: avoid-page;
+  break-after: auto;
+  orphans: 3;
+  widows: 3
+}
+span.break, dd.break {
+  margin-bottom: 0;
+  min-height: 0;
+  break-before: auto;
+  break-inside: auto;
+  break-after: auto;
+}
+/* Undo break-before ToC */
+@media print {
+  #toc {
+    break-before: auto;
+  }
+}
+/* Text in compact lists should not get extra bottom margin space,
+   since that would makes the list not compact */
+ul.compact p, .ulCompact p,
+ol.compact p, .olCompact p {
+ margin: 0;
+}
+/* But the list as a whole needs the extra space at the end */
+section ul.compact,
+section .ulCompact,
+section ol.compact,
+section .olCompact {
+  margin-bottom: 1em;                    /* same as p not within ul.compact etc. */
+}
+/* The tt and code background above interferes with for instance table cell
+   backgrounds.  Changed to something a bit more selective. */
+tt, code {
+  background-color: transparent;
+}
+p tt, p code, li tt, li code {
+  background-color: #f8f8f8;
+}
+/* Tweak the pre margin -- 0px doesn't come out well */
+pre {
+   margin-top: 0.5px;
+}
+/* Tweak the compact list text */
+ul.compact, .ulCompact,
+ol.compact, .olCompact,
+dl.compact, .dlCompact {
+  line-height: normal;
+}
+/* Don't add top margin for nested lists */
+li > ul, li > ol, li > dl,
+dd > ul, dd > ol, dd > dl,
+dl > dd > dl {
+  margin-top: initial;
+}
+/* Elements that should not be rendered on the same line as a <dt> */
+/* This should match the element list in writer.text.TextWriter.render_dl() */
+dd > div.artwork:first-child,
+dd > aside:first-child,
+dd > figure:first-child,
+dd > ol:first-child,
+dd > div.sourcecode:first-child,
+dd > table:first-child,
+dd > ul:first-child {
+  clear: left;
+}
+/* fix for weird browser behaviour when <dd/> is empty */
+dt+dd:empty::before{
+  content: "\00a0";
+}
+/* Make paragraph spacing inside <li> smaller than in body text, to fit better within the list */
+li > p {
+  margin-bottom: 0.5em
+}
+/* Don't let p margin spill out from inside list items */
+li > p:last-of-type:only-child {
+  margin-bottom: 0;
+}
+</style>
+<link href="rfc-local.css" rel="stylesheet" type="text/css">
+<script type="application/javascript">async function addMetadata(){try{const e=document.styleSheets[0].cssRules;for(let t=0;t<e.length;t++)if(/#identifiers/.exec(e[t].selectorText)){const a=e[t].cssText.replace("#identifiers","#external-updates");document.styleSheets[0].insertRule(a,document.styleSheets[0].cssRules.length)}}catch(e){console.log(e)}const e=document.getElementById("external-metadata");if(e)try{var t,a="",o=function(e){const t=document.getElementsByTagName("meta");for(let a=0;a<t.length;a++)if(t[a].getAttribute("name")===e)return t[a].getAttribute("content");return""}("rfc.number");if(o){t="https://www.rfc-editor.org/rfc/rfc"+o+".json";try{const e=await fetch(t);a=await e.json()}catch(e){t=document.URL.indexOf("html")>=0?document.URL.replace(/html$/,"json"):document.URL+".json";const o=await fetch(t);a=await o.json()}}if(!a)return;e.style.display="block";const s="",d="https://datatracker.ietf.org/doc",n="https://datatracker.ietf.org/ipr/search",c="https://www.rfc-editor.org/info",l=a.doc_id.toLowerCase(),i=a.doc_id.slice(0,3).toLowerCase(),f=a.doc_id.slice(3).replace(/^0+/,""),u={status:"Status",obsoletes:"Obsoletes",obsoleted_by:"Obsoleted By",updates:"Updates",updated_by:"Updated By",see_also:"See Also",errata_url:"Errata"};let h="<dl style='overflow:hidden' id='external-updates'>";["status","obsoletes","obsoleted_by","updates","updated_by","see_also","errata_url"].forEach(e=>{if("status"==e){a[e]=a[e].toLowerCase();var t=a[e].split(" "),o=t.length,w="",p=1;for(let e=0;e<o;e++)p<o?w=w+r(t[e])+" ":w+=r(t[e]),p++;a[e]=w}else if("obsoletes"==e||"obsoleted_by"==e||"updates"==e||"updated_by"==e){var g,m="",b=1;g=a[e].length;for(let t=0;t<g;t++)a[e][t]&&(a[e][t]=String(a[e][t]).toLowerCase(),m=b<g?m+"<a href='"+s+"/rfc/".concat(a[e][t])+"'>"+a[e][t].slice(3)+"</a>, ":m+"<a href='"+s+"/rfc/".concat(a[e][t])+"'>"+a[e][t].slice(3)+"</a>",b++);a[e]=m}else if("see_also"==e){var y,L="",C=1;y=a[e].length;for(let t=0;t<y;t++)if(a[e][t]){a[e][t]=String(a[e][t]);var _=a[e][t].slice(0,3),v=a[e][t].slice(3).replace(/^0+/,"");L=C<y?"RFC"!=_?L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+_+" "+v+"</a>, ":L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+v+"</a>, ":"RFC"!=_?L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+_+" "+v+"</a>":L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+v+"</a>",C++}a[e]=L}else if("errata_url"==e){var R="";R=a[e]?R+"<a href='"+a[e]+"'>Errata exist</a> | <a href='"+d+"/"+l+"'>Datatracker</a>| <a href='"+n+"/?"+i+"="+f+"&submit="+i+"'>IPR</a> | <a href='"+c+"/"+l+"'>Info page</a>":"<a href='"+d+"/"+l+"'>Datatracker</a> | <a href='"+n+"/?"+i+"="+f+"&submit="+i+"'>IPR</a> | <a href='"+c+"/"+l+"'>Info page</a>",a[e]=R}""!=a[e]?"Errata"==u[e]?h+=`<dt>More info:</dt><dd>${a[e]}</dd>`:h+=`<dt>${u[e]}:</dt><dd>${a[e]}</dd>`:"Errata"==u[e]&&(h+=`<dt>More info:</dt><dd>${a[e]}</dd>`)}),h+="</dl>",e.innerHTML=h}catch(e){console.log(e)}else console.log("Could not locate metadata <div> element");function r(e){return e.charAt(0).toUpperCase()+e.slice(1)}}window.removeEventListener("load",addMetadata),window.addEventListener("load",addMetadata);</script>
+</head>
+<body class="xml2rfc">
+<script src="metadata.min.js"></script>
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">EIL</td>
+<td class="right">January 2024</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Pan, et al.</td>
+<td class="center">Expires 18 July 2024</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">dnsop</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-pan-dnsop-edns-isp-location-05</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2024-01-15" class="published">15 January 2024</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2024-07-18">18 July 2024</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">L. Pan</div>
+</div>
+<div class="author">
+      <div class="author-name">Y. Fu</div>
+<div class="org">China Unicom</div>
+</div>
+<div class="author">
+      <div class="author-name">C. Wang</div>
+<div class="org">China Unicom</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">ISP Location in DNS Queries</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">Nowadays, many authoritative servers support GeoIP feature, 
+they guess the client's geolocation by the client subnet of EDNS Client Subnet (ECS) or by the source IP address of DNS query, return tailor DNS response based on the client's geolocation. 
+However, ECS raises some privacy concerns because it leaks client subnet information on the resolution path to the authoritative server.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-2">This document describes an improved GeoIP solution,
+defines an EDNS ISP Location (EIL) extension to address the privacy problem of ECS, 
+tries to find the right balance between privacy improvement and user experience optimization.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+<p id="section-abstract-3">EIL is defined to convey isp location &lt; COUNTRY, AREA, ISP &gt; information that is relevant to the DNS message. 
+It will directly provide sufficient information for the GeoIP-enabled authoritative server as ECS, decide the response without guessing client's geolocation.<a href="#section-abstract-3" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 18 July 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2024 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-terminology" class="internal xref">Terminology</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-problem-of-ecs" class="internal xref">Problem of ECS</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1" class="keepWithNext"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-client" class="internal xref">Client</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-recursive-resolver" class="internal xref">Recursive Resolver</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="auto internal xref">3.3</a>.  <a href="#name-geoip-enabled-authoritative" class="internal xref">GeoIP-enabled Authoritative Server</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-eil-overview" class="internal xref">EIL Overview</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-the-eil-edns0-option" class="internal xref">The EIL EDNS0 option</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-protocol-description" class="internal xref">Protocol Description</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-originating-the-option" class="internal xref">Originating the Option</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1.2.1">
+                    <p id="section-toc.1-1.5.2.1.2.1.1"><a href="#section-5.1.1" class="auto internal xref">5.1.1</a>.  <a href="#name-p-model-public-recursive-re" class="internal xref">P-Model: Public Recursive Resolver</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1.2.2">
+                    <p id="section-toc.1-1.5.2.1.2.2.1"><a href="#section-5.1.2" class="auto internal xref">5.1.2</a>.  <a href="#name-i-model-isp-recursive-resol" class="internal xref">I-Model: ISP Recursive Resolver</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1.2.3">
+                    <p id="section-toc.1-1.5.2.1.2.3.1"><a href="#section-5.1.3" class="auto internal xref">5.1.3</a>.  <a href="#name-l-model-local-forwarding-re" class="internal xref">L-Model: Local Forwarding Resolver</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-generating-a-response" class="internal xref">Generating a Response</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2.2.1">
+                    <p id="section-toc.1-1.5.2.2.2.1.1"><a href="#section-5.2.1" class="auto internal xref">5.2.1</a>.  <a href="#name-path-calculation-and-tailor" class="internal xref">Path Calculation and Tailored DNS Response</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2.2.2">
+                    <p id="section-toc.1-1.5.2.2.2.2.1"><a href="#section-5.2.2" class="auto internal xref">5.2.2</a>.  <a href="#name-whitelist" class="internal xref">Whitelist</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2.2.3">
+                    <p id="section-toc.1-1.5.2.2.2.3.1"><a href="#section-5.2.3" class="auto internal xref">5.2.3</a>.  <a href="#name-authoritative-server" class="internal xref">Authoritative Server</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2.2.4">
+                    <p id="section-toc.1-1.5.2.2.2.4.1"><a href="#section-5.2.4" class="auto internal xref">5.2.4</a>.  <a href="#name-intermediate-nameserver" class="internal xref">Intermediate Nameserver</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-handling-eil-responses-and-" class="internal xref">Handling EIL Responses and Caching</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3.2.1">
+                    <p id="section-toc.1-1.5.2.3.2.1.1"><a href="#section-5.3.1" class="auto internal xref">5.3.1</a>.  <a href="#name-answering-from-cache" class="internal xref">Answering from Cache</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3.2.2">
+                    <p id="section-toc.1-1.5.2.3.2.2.1"><a href="#section-5.3.2" class="auto internal xref">5.3.2</a>.  <a href="#name-delegations-and-negative-an" class="internal xref">Delegations and Negative Answers</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4">
+                <p id="section-toc.1-1.5.2.4.1"><a href="#section-5.4" class="auto internal xref">5.4</a>.  <a href="#name-deploy" class="internal xref">Deploy</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4.2.1">
+                    <p id="section-toc.1-1.5.2.4.2.1.1"><a href="#section-5.4.1" class="auto internal xref">5.4.1</a>.  <a href="#name-transitivity" class="internal xref">Transitivity</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4.2.2">
+                    <p id="section-toc.1-1.5.2.4.2.2.1"><a href="#section-5.4.2" class="auto internal xref">5.4.2</a>.  <a href="#name-compatibility-with-non-edns" class="internal xref">Compatibility with non-EDNS and ECS</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4.2.3">
+                    <p id="section-toc.1-1.5.2.4.2.3.1"><a href="#section-5.4.3" class="auto internal xref">5.4.3</a>.  <a href="#name-intermediate-servers-suppor" class="internal xref">Intermediate Servers Support ECS and EIL at the Same Time</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.5">
+                <p id="section-toc.1-1.5.2.5.1"><a href="#section-5.5" class="auto internal xref">5.5</a>.  <a href="#name-why-not-use-as-number-to-bu" class="internal xref">Why not use AS number to build EIL</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-benefit-and-cost" class="internal xref">Benefit and Cost</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                <p id="section-toc.1-1.6.2.1.1"><a href="#section-6.1" class="auto internal xref">6.1</a>.  <a href="#name-client-2" class="internal xref">Client</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.2">
+                <p id="section-toc.1-1.6.2.2.1"><a href="#section-6.2" class="auto internal xref">6.2</a>.  <a href="#name-recursive-resolver-2" class="internal xref">Recursive Resolver</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.3">
+                <p id="section-toc.1-1.6.2.3.1"><a href="#section-6.3" class="auto internal xref">6.3</a>.  <a href="#name-geoip-enabled-authoritative-" class="internal xref">GeoIP-enabled Authoritative Server</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-dnssec" class="internal xref">DNSSEC</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-privacy" class="internal xref">Privacy</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-target-censorship" class="internal xref">Target Censorship</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4">
+                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-ddos" class="internal xref">DDoS</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-acknowledgements" class="internal xref">Acknowledgements</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-appendix-a-geoip-enabled-au" class="internal xref">Appendix A. GeoIP-enabled Authoritative Servers Example</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
+                <p id="section-toc.1-1.10.2.1.1"><a href="#section-10.1" class="auto internal xref">10.1</a>.  <a href="#name-bind" class="internal xref">BIND</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2">
+                <p id="section-toc.1-1.10.2.2.1"><a href="#section-10.2" class="auto internal xref">10.2</a>.  <a href="#name-powerdns" class="internal xref">PowerDNS</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.3">
+                <p id="section-toc.1-1.10.2.3.1"><a href="#section-10.3" class="auto internal xref">10.3</a>.  <a href="#name-amazon" class="internal xref">Amazon</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.4">
+                <p id="section-toc.1-1.10.2.4.1"><a href="#section-10.4" class="auto internal xref">10.4</a>.  <a href="#name-dyn" class="internal xref">DYN</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.5">
+                <p id="section-toc.1-1.10.2.5.1"><a href="#section-10.5" class="auto internal xref">10.5</a>.  <a href="#name-gdnsd" class="internal xref">gdnsd</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.6">
+                <p id="section-toc.1-1.10.2.6.1"><a href="#section-10.6" class="auto internal xref">10.6</a>.  <a href="#name-windows-server" class="internal xref">Windows Server</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#section-11" class="auto internal xref">11</a>. <a href="#name-appendix-b-eil-example" class="internal xref">Appendix B. EIL Example</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.1">
+                <p id="section-toc.1-1.11.2.1.1"><a href="#section-11.1" class="auto internal xref">11.1</a>.  <a href="#name-p-model" class="internal xref">P-Model</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.2">
+                <p id="section-toc.1-1.11.2.2.1"><a href="#section-11.2" class="auto internal xref">11.2</a>.  <a href="#name-i-model" class="internal xref">I-Model</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.3">
+                <p id="section-toc.1-1.11.2.3.1"><a href="#section-11.3" class="auto internal xref">11.3</a>.  <a href="#name-l-model" class="internal xref">L-Model</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#section-12" class="auto internal xref">12</a>. <a href="#name-appendix-c-frequent-geoip-e" class="internal xref">Appendix C. Frequent GeoIP-enabled Authoritative Server's Response Accuracy Problem</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.1">
+                <p id="section-toc.1-1.12.2.1.1"><a href="#section-12.1" class="auto internal xref">12.1</a>.  <a href="#name-public-recursive-resolver-w" class="internal xref">Public Recursive Resolver with non-ECS Authoritative Server</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.2">
+                <p id="section-toc.1-1.12.2.2.1"><a href="#section-12.2" class="auto internal xref">12.2</a>.  <a href="#name-ip2geo-database-quality" class="internal xref">IP2Geo Database Quality</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.3">
+                <p id="section-toc.1-1.12.2.3.1"><a href="#section-12.3" class="auto internal xref">12.3</a>.  <a href="#name-unstable-isp-network-topolo" class="internal xref">Unstable ISP Network Topology</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="#section-13" class="auto internal xref">13</a>. <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1">
+                <p id="section-toc.1-1.13.2.1.1"><a href="#section-13.1" class="auto internal xref">13.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.2">
+                <p id="section-toc.1-1.13.2.2.1"><a href="#section-13.2" class="auto internal xref">13.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
+            <p id="section-toc.1-1.14.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">Nowadays, many authoritative servers support GeoIP feature, such as <span>[<a href="#BIND-GeoIP" class="cite xref">BIND-GeoIP</a>]</span>, <span>[<a href="#PowerDNS-GeoIP" class="cite xref">PowerDNS-GeoIP</a>]</span>, <span>[<a href="#Amazon-GeoIP" class="cite xref">Amazon-GeoIP</a>]</span>, <span>[<a href="#DYN-GeoIP" class="cite xref">DYN-GeoIP</a>]</span>, <span>[<a href="#gdnsd-GeoIP" class="cite xref">gdnsd-GeoIP</a>]</span>, <span>[<a href="#WindowsServer-GeoIP" class="cite xref">WindowsServer-GeoIP</a>]</span> (More details are given in Appendix A). These geographically aware authoritative servers guess the client's geolocation by the client subnet of ECS or by the source IP address of DNS query, return tailor DNS response based on the client's geolocation.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">ECS is an EDNS0 option <span>[<a href="#RFC6891" class="cite xref">RFC6891</a>]</span>, described in <span>[<a href="#RFC7871" class="cite xref">RFC7871</a>]</span>, carries client subnet information in DNS queries for authoritative server. Compared to source IP address of DNS query, ECS will help authoritative server to guess the client's geolocation more precisely because of the DNS forwarding query structure.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">GeoIP-enabled authoritative servers use ECS for client geolocation detecting. However, ECS raises some privacy concerns because it leaks client subnet information on the resolution path to the authoritative server <span>[<a href="#ECS-Privacy" class="cite xref">ECS-Privacy</a>]</span>.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">This document describes an improved GeoIP solution,
+defines an EDNS ISP Location (EIL) extension to address the privacy problem of ECS, 
+tries to find the right balance between privacy improvement and user experience optimization.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">EIL is defined to convey isp location &lt; COUNTRY, AREA, ISP &gt; information that is relevant to the DNS message. 
+It will directly provide the same sufficient information for the GeoIP-enabled authoritative server as ECS, decide the response without guessing client's geolocation.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-6">EIL is intended for those local forwarding resolvers, recursive resolvers and authoritative servers that would benefit from the extension and not for general purpose deployment. EIL could be applied for tailor DNS response for GeoIP scenario. EIL can safely be ignored by servers that choose not to implement or enable it.<a href="#section-1-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="terminology">
+<section id="section-2">
+      <h2 id="name-terminology">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-terminology" class="section-name selfRef">Terminology</a>
+      </h2>
+<p id="section-2-1">The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> when they appear in ALL CAPS. When these words are not in ALL CAPS (such as "should" or "Should"), they have their usual English meanings, and are not to be interpreted as <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> keywords.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">Basic terms used in this specification are defined in the documents <span>[<a href="#RFC1034" class="cite xref">RFC1034</a>]</span>, <span>[<a href="#RFC1035" class="cite xref">RFC1035</a>]</span>, <span>[<a href="#RFC8499" class="cite xref">RFC8499</a>]</span> and <span>[<a href="#RFC7871" class="cite xref">RFC7871</a>]</span>.<a href="#section-2-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2-3.1">EIL: EDNS ISP Location.<a href="#section-2-3.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-3.2">ECS: EDNS Client Subnet, described in <span>[<a href="#RFC7871" class="cite xref">RFC7871</a>]</span>.<a href="#section-2-3.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-3.3">Stub Resolver: A resolver that cannot perform all resolution itself.<a href="#section-2-3.3" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-3.4">Authoritative Server: It is a server that knows the content of a DNS zone from local knowledge, and thus can answer queries about that zone without needing to query other servers.<a href="#section-2-3.4" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-3.5">Intermediate Nameserver: Any nameserver in between the stub resolver and the authoritative server, such as a recursive resolver or a forwarding resolver.<a href="#section-2-3.5" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-3.6">Local Forwarding Resolver: It is the first forwarding resolver which receives DNS queries from stub resolver, usually deployed nearby the first-hop router such as public Wi-Fi hotspot routers and home routers.<a href="#section-2-3.6" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-3.7">Recursive Resolver: It is the last-hop before authoritative server in the DNS query path.<a href="#section-2-3.7" class="pilcrow">¶</a>
+</li>
+      </ul>
+</section>
+</div>
+<div id="problem-of-ecs">
+<section id="section-3">
+      <h2 id="name-problem-of-ecs">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-problem-of-ecs" class="section-name selfRef">Problem of ECS</a>
+      </h2>
+<p id="section-3-1">As mentioned in <span>[<a href="#RFC7871" class="cite xref">RFC7871</a>]</span>'s abstract section, since ECS has some known operational and privacy shortcomings, a revision will be worked through the IETF for improvement.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<div id="client">
+<section id="section-3.1">
+        <h3 id="name-client">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-client" class="section-name selfRef">Client</a>
+        </h3>
+<p id="section-3.1-1">Common clients have little power to defense passive monitoring, expecially in the plain-text traffic.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.1-2">ECS's client subnet leakage has rise some user privacy concerns.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="recursive-resolver">
+<section id="section-3.2">
+        <h3 id="name-recursive-resolver">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-recursive-resolver" class="section-name selfRef">Recursive Resolver</a>
+        </h3>
+<p id="section-3.2-1">Recursive resolver must deal with ECS's cache problem, such as low cache hitrate, rise response time, redundant cache size, etc.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">Mukund Sivaraman described some scenarios in <span>[<a href="#ClientSubnet-Bis" class="cite xref">ClientSubnet-Bis</a>]</span>.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.2-3">ECS is precise because it is based on client subnet. But IPv6 addresses will boom, we can foresee it to increase more burden on global recursive resolvers.<a href="#section-3.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="geoip-enabled-authoritative-server">
+<section id="section-3.3">
+        <h3 id="name-geoip-enabled-authoritative">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-geoip-enabled-authoritative" class="section-name selfRef">GeoIP-enabled Authoritative Server</a>
+        </h3>
+<p id="section-3.3-1">Tranditional recursive resolver's IP can on behalf of many client subnets because they are network topological close.
+But this scenario has been varied by public recursive resolver. ECS push client subnets to authoritative server, wants to solve the "public recursive resolver's IP is network topological far from client subnet" problem.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.3-2">Therefore, ECS rises GeoIP-enabled authoritative server's dependence on IP2Geo database quality, because authoritative server should guess geolocation for huge amounts of client subnet.
+Every GeoIP-enabled authoritative server must operate IP2Geo database carefully and catch up with network topology change. 
+The work is inevitable, but ECS aggravate this, because the number of client subnets is far greater than the number of recursive resolvers. 
+GeoIP-enabled authoritative server needs a more precise IP2Geo database, updates it more frequent than before, to catch up with the huge client subnet network topology, but not the recursive resolver's IP network topology.
+Every GeoIP-enabled authoritative server should cost more on IP2Geo database.<a href="#section-3.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="eil-overview">
+<section id="section-4">
+      <h2 id="name-eil-overview">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-eil-overview" class="section-name selfRef">EIL Overview</a>
+      </h2>
+<p id="section-4-1">EIL is an EDNS0 option to allow local forwarding resolvers and recursive resolvers, if they are willing, to forward details about the isp location of client when talking to other nameservers. EIL can be added in queries sent by local forwarding resolvers or recursive resolvers in a way that is transparent to stub resolvers and end users.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-2">Authoritative servers could provide a better answer by using precise isp location in EIL. Intermediate Nameservers could send EIL query and cache the EIL response. This document also provides a mechanism to signal Intermediate Nameservers that they do not want EIL treatment for specific queries.<a href="#section-4-2" class="pilcrow">¶</a></p>
+<p id="section-4-3">EIL is only defined for the Internet (IN) DNS class.<a href="#section-4-3" class="pilcrow">¶</a></p>
+<div id="the-eil-edns0-option">
+<section id="section-4.1">
+        <h3 id="name-the-eil-edns0-option">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-the-eil-edns0-option" class="section-name selfRef">The EIL EDNS0 option</a>
+        </h3>
+<p id="section-4.1-1">The EIL is an EDNS0 option to include the &lt; COUNTRY, AREA, ISP &gt; isp location of client in DNS messages.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2">It is 16 octets which is structured as follows:<a href="#section-4.1-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.1-3">
+<pre>
+                +0 (MSB)                            +1 (LSB)
+      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+   0: |                         OPTION-CODE                           |
+      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+   2: |                         OPTION-LENGTH                         |
+      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+   4: |                         COUNTRY                               |
+      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+   6: |                         AREA                                  |
+      |                                                               |
+      |                                                               |
+      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+  12: |                         ISP                                   |
+      |                                                               |
+      +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+
+      Total: 16 octets.
+</pre><a href="#section-4.1-3" class="pilcrow">¶</a>
+</div>
+<ul class="normal">
+<li class="normal" id="section-4.1-4.1">OPTION-CODE, 2 octets, defined in <span>[<a href="#RFC6891" class="cite xref">RFC6891</a>]</span>. EDNS option code should be assigned by the IANA.<a href="#section-4.1-4.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-4.1-4.2">OPTION-LENGTH, 2 octets, defined in <span>[<a href="#RFC6891" class="cite xref">RFC6891</a>]</span>, contains the length of the payload (everything after OPTION-LENGTH) in octets.<a href="#section-4.1-4.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-4.1-4.3">COUNTRY, 2 octets, uppercase, defined in <span>[<a href="#ISO3166" class="cite xref">ISO3166</a>]</span>, indicates the country information of the client's IP. For example, China's COUNTRY is CN.<a href="#section-4.1-4.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-4.1-4.4">AREA, 6 octets, uppercase, defined in <span>[<a href="#ISO3166" class="cite xref">ISO3166</a>]</span> country subdivision code, indicates the area information of the client's IP. For example, The AREA of Fujian Province in China is 35.<a href="#section-4.1-4.4" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-4.1-4.5">ISP, 4 octets, uppercase, indicates the ISP information of the client's IP, using shortcut names. ISP shortcut names are unique within the context of the COUNTRY. For example, the shortcut name of China Telecommunications Corporation is TEL, the shortcut name of China United Network Communications is UNI, the shortcut name of China Mobile is MOB, etc.<a href="#section-4.1-4.5" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-4.1-5">All fields are in network byte order ("big-endian", per <span>[<a href="#RFC1700" class="cite xref">RFC1700</a>]</span>, Data Notation).<a href="#section-4.1-5" class="pilcrow">¶</a></p>
+<p id="section-4.1-6">The aim to use shortcut names in the ISP field is to limit the data size of EIL, decrease the DDoS risk.<a href="#section-4.1-6" class="pilcrow">¶</a></p>
+<p id="section-4.1-7">The null value 0x20 signifies that the field is unknown. If all fields in EIL are set to null value, it means that client doesn't want to use EIL.<a href="#section-4.1-7" class="pilcrow">¶</a></p>
+<p id="section-4.1-8">Authoritative servers can send EIL response with the * value 0x2A in AREA field or ISP field (not COUNTRY field), which signifies that the field is wildcard match. For example,  &lt; CN, *, TEL &gt; indicates "all area in China, Telecom ISP", &lt; CN, *, * &gt; indicates "all area in China".<a href="#section-4.1-8" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="protocol-description">
+<section id="section-5">
+      <h2 id="name-protocol-description">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-protocol-description" class="section-name selfRef">Protocol Description</a>
+      </h2>
+<div id="originating-the-option">
+<section id="section-5.1">
+        <h3 id="name-originating-the-option">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-originating-the-option" class="section-name selfRef">Originating the Option</a>
+        </h3>
+<p id="section-5.1-1">The EIL can be initialized by public recursive resolver, ISP recursive resolver, or local forwarding resolver.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">Examples are given in Appendix B.<a href="#section-5.1-2" class="pilcrow">¶</a></p>
+<div id="p-model-public-recursive-resolver">
+<section id="section-5.1.1">
+          <h4 id="name-p-model-public-recursive-re">
+<a href="#section-5.1.1" class="section-number selfRef">5.1.1. </a><a href="#name-p-model-public-recursive-re" class="section-name selfRef">P-Model: Public Recursive Resolver</a>
+          </h4>
+<p id="section-5.1.1-1">Public recursive resolvers are not close to many clients because the service providers couldn't deploy servers in every country and every ISP's network, which will affect the response accuracy of authoritative servers. 
+To address this problem, ECS shifts the client subnet information to authoritative server, but rises user privacy concerns.<a href="#section-5.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1.1-2">Therefore, to keep balance between precise and privacy, when a public recursive resolver receives a DNS query, it can guess isp location of client's IP and generate the EIL OPT data, then send EIL query to the authoritative server. This will move the "guess location of client's IP" work from authoritative server back to public recursive resolver, lighten the burden of authoritative server, but increase DDoS risk on public recursive resolver.<a href="#section-5.1.1-2" class="pilcrow">¶</a></p>
+<p id="section-5.1.1-3">In order to improve the user's privacy, if a recursive resolver receives a DNS query with ECS, it can guess the isp location of SOURCE-PREFIX from the ECS OPT data, and make a new DNS query with EIL, then send the query to authoritative server which supports EIL.<a href="#section-5.1.1-3" class="pilcrow">¶</a></p>
+<p id="section-5.1.1-4">P-model is the most recommended and close to the ECS.<a href="#section-5.1.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="i-model-isp-recursive-resolver">
+<section id="section-5.1.2">
+          <h4 id="name-i-model-isp-recursive-resol">
+<a href="#section-5.1.2" class="section-number selfRef">5.1.2. </a><a href="#name-i-model-isp-recursive-resol" class="section-name selfRef">I-Model: ISP Recursive Resolver</a>
+          </h4>
+<p id="section-5.1.2-1">ISP recursive resolver only serves its customers, each of whom has a static isp location. ISP recursive resolver can add EIL transparent to end client, and then authoritative server doesn't need to "guess location of client's IP".<a href="#section-5.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.1.2-2">EIL will be benefit if the authoritative server could not find the approximate isp location of ISP recursive resolver, which is crucial to DNS response accuracy in ECS.<a href="#section-5.1.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="l-model-local-forwarding-resolver">
+<section id="section-5.1.3">
+          <h4 id="name-l-model-local-forwarding-re">
+<a href="#section-5.1.3" class="section-number selfRef">5.1.3. </a><a href="#name-l-model-local-forwarding-re" class="section-name selfRef">L-Model: Local Forwarding Resolver</a>
+          </h4>
+<p id="section-5.1.3-1">Local forwarding resolver is usually on the first-hop router, such as public Wi-Fi hotspot routers and Cisco/Linksys/Netgear/TP-LINK home routers.<a href="#section-5.1.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.1.3-2">When a local forwarding resolver that implements EIL receives a DNS query from an end client, it surely can know about the isp location of client's IP, and generate the EIL OPT data, then send the EIL query to the recursive resolver. Recursive resolver sends the EIL query to the authoritative server.<a href="#section-5.1.3-2" class="pilcrow">¶</a></p>
+<p id="section-5.1.3-3">In this scenario, both public recursive resolver and authoritative server don't need to "guess location of client's IP", 
+because the local forwarding resolver supplies the isp location precisely. 
+That is, EIL can reduce the dependence on the IP geolocation database quality, which is crucial to DNS response accuracy in ECS.<a href="#section-5.1.3-3" class="pilcrow">¶</a></p>
+<p id="section-5.1.3-4">If a local forwarding resolver had sent a query with EIL, and receives a REFUSE response, it MUST regenerate a query with no EIL.<a href="#section-5.1.3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="generating-a-response">
+<section id="section-5.2">
+        <h3 id="name-generating-a-response">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-generating-a-response" class="section-name selfRef">Generating a Response</a>
+        </h3>
+<div id="path-calculation-and-tailored-dns-response">
+<section id="section-5.2.1">
+          <h4 id="name-path-calculation-and-tailor">
+<a href="#section-5.2.1" class="section-number selfRef">5.2.1. </a><a href="#name-path-calculation-and-tailor" class="section-name selfRef">Path Calculation and Tailored DNS Response</a>
+          </h4>
+<p id="section-5.2.1-1">Separate the consideration of path calculation (data provider) and tailored DNS response (authoritative server).<a href="#section-5.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.2.1-2">Data providers make path calculations to optimize content delivery on the Internet based on the network topology, considering many factors such as IP, RIPs, FIBs, AS Path hops, system load, content availability, path latency, etc. Note that, data providers have the full details of the clients, they can make any complex path calculations without ECS and EIL.
+Data Providers can make path calculations based on network topology, decide network topological close datacenter for each IP address.<a href="#section-5.2.1-2" class="pilcrow">¶</a></p>
+<p id="section-5.2.1-3">Authoritative servers allocate tailored DNS response to each IP address based on the "network topological close" result of path calculations.
+Based on the result of path calculation, data providers could build up their GeoIP configuration for their domains. Usually, clients from the same &lt; COUNTRY, AREA, ISP &gt; isp location are allocated to the same best "network topologically close" target ip addresses. For example, client IP addresses from &lt; China, Beijing, Telecom &gt; are allocated to Target-IP-addresses-1 (ip1, ..., ip4), client IP addresses from &lt; China, Beijing, Unicom &gt; are allocated to Target-IP-addresses-2 (ip5, ..., ip8), etc.<a href="#section-5.2.1-3" class="pilcrow">¶</a></p>
+<p id="section-5.2.1-4">Data providers publish their GeoIP configuration to Authoritative servers. Authoritative servers load the GeoIP configuration, and return the GeoIP-based tailored DNS response based on client's geolocation.
+If the GeoIP-enabled authoritative servers support ECS, they can use the client subnet information of ECS for client's geolocation detecting.
+Alternative, if the GeoIP-enabled authoritative servers support EIL, they can use the &lt; COUNTRY, AREA, ISP &gt; information of EIL directly, without client's geolocation detecting.<a href="#section-5.2.1-4" class="pilcrow">¶</a></p>
+<p id="section-5.2.1-5">EIL tell authoritative server like that, "I want to know what is best IP address for clients from &lt; China, Beijing, Telecom &gt; at network topology path calculations result", but not "I want to know what is the nearest IP address for clients from &lt; China, Beijing, Telecom &gt; at physical topology path calculations result".<a href="#section-5.2.1-5" class="pilcrow">¶</a></p>
+<p id="section-5.2.1-6">EIL is satisfied if authoritative servers aggregate the IP addresses from the same &lt; COUNTRY, AREA, ISP &gt; isp location to visit the same datacenters, we call that GeoIP-based tailored DNS responses, and these tailored responses have the best "network topological close" distance to the clients which are generated from network topology path calculations result.<a href="#section-5.2.1-6" class="pilcrow">¶</a></p>
+<p id="section-5.2.1-7">ECS is satisfied if authoritative servers make tailored DNS response down to subnet precise level. For example, (subnet-1, ..., subnet-10) are from the same &lt; COUNTRY, AREA, ISP &gt; isp location, Data Provider can apply (subnet-1, ..., subnet-5) visit Target-IP-addresses-1 (ip1, ..., ip2), (subnet-6, ..., subnet-10) visit Target-IP-addresses-1 (ip3, ..., ip4).<a href="#section-5.2.1-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="whitelist">
+<section id="section-5.2.2">
+          <h4 id="name-whitelist">
+<a href="#section-5.2.2" class="section-number selfRef">5.2.2. </a><a href="#name-whitelist" class="section-name selfRef">Whitelist</a>
+          </h4>
+<p id="section-5.2.2-1">EIL contains a whitelist for &lt; COUNTRY, AREA and ISP &gt;, which can be discussed and maintained by the DNSOP working group. 
+Authoritative servers that supporting EIL must only response the EIL queries matched the whitelist. 
+Recursive resolver that supporting EIL must only cache the EIL responses matched the whitelist.<a href="#section-5.2.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authoritative-server">
+<section id="section-5.2.3">
+          <h4 id="name-authoritative-server">
+<a href="#section-5.2.3" class="section-number selfRef">5.2.3. </a><a href="#name-authoritative-server" class="section-name selfRef">Authoritative Server</a>
+          </h4>
+<p id="section-5.2.3-1">Using the &lt; COUNTRY, AREA and ISP &gt; isp location specified in the EIL option of DNS query, an authoritative server can generate a tailored response.<a href="#section-5.2.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.2.3-2">Authoritative servers that have not implemented or enabled support for the EIL ought to safely ignore it within incoming queries, response the query as a normal case without EDNS0 option. Such a server MUST NOT include an EIL option within replies to indicate lack of support for it.<a href="#section-5.2.3-2" class="pilcrow">¶</a></p>
+<p id="section-5.2.3-3">An authoritative server that has implemented this protocol and receives an EIL option MUST include an EIL option in its response to indicate that it SHOULD be cached accordingly.<a href="#section-5.2.3-3" class="pilcrow">¶</a></p>
+<p id="section-5.2.3-4">An authoritative server will return a more appropriate tailored response for the query with an EIL option containing more precisely AREA.<a href="#section-5.2.3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="intermediate-nameserver">
+<section id="section-5.2.4">
+          <h4 id="name-intermediate-nameserver">
+<a href="#section-5.2.4" class="section-number selfRef">5.2.4. </a><a href="#name-intermediate-nameserver" class="section-name selfRef">Intermediate Nameserver</a>
+          </h4>
+<p id="section-5.2.4-1">Like ECS, intermediate nameserver passes a DNS response with an EIL option to its client when the client indicates support EIL.<a href="#section-5.2.4-1" class="pilcrow">¶</a></p>
+<p id="section-5.2.4-2">If an intermediate nameserver receives a response that has a larger area than the AREA provided in its query, it SHOULD still provide the result as the answer to the triggering client request even if the client is in a smaller area.<a href="#section-5.2.4-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="handling-eil-responses-and-caching">
+<section id="section-5.3">
+        <h3 id="name-handling-eil-responses-and-">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-handling-eil-responses-and-" class="section-name selfRef">Handling EIL Responses and Caching</a>
+        </h3>
+<p id="section-5.3-1">If an intermediate nameserver had sent a query with EIL, and receives a NOERROR response without EIL option, it SHOULD treat this answer as suitable for all clients.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3-2">Other handling considerations are similar with <span>[<a href="#RFC7871" class="cite xref">RFC7871</a>]</span>, SECTION 7.3.<a href="#section-5.3-2" class="pilcrow">¶</a></p>
+<p id="section-5.3-3">In the cache, all resource records in the answer section MUST be tied to the isp location specified in the response. The answer section is valid for all areas which the EIL option covered. For example, an EIL option &lt; CN, 35, TEL &gt; covers all 9 cities in Fujian province of China Telecommunications ISP.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+<p id="section-5.3-4">Same with ECS, the additional and authority sections are excluded.<a href="#section-5.3-4" class="pilcrow">¶</a></p>
+<p id="section-5.3-5">Enabling support for EIL in an intermediate nameserver will increase the size of the cache, and prevent "client subnet leak" privacy concern of ECS.<a href="#section-5.3-5" class="pilcrow">¶</a></p>
+<div id="answering-from-cache">
+<section id="section-5.3.1">
+          <h4 id="name-answering-from-cache">
+<a href="#section-5.3.1" class="section-number selfRef">5.3.1. </a><a href="#name-answering-from-cache" class="section-name selfRef">Answering from Cache</a>
+          </h4>
+<p id="section-5.3.1-1">Cache lookups are first done as usual for a DNS query, using the query tuple of &lt; name, type, class &gt;. Then, the appropriate RRset MUST be chosen based on the isp location matching.<a href="#section-5.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.3.1-2">If there was an EIL option, the intermediate nameserver will lookup for &lt; same COUNTRY, same AREA, same ISP &gt; of the same query tuple in the cache.<a href="#section-5.3.1-2" class="pilcrow">¶</a></p>
+<p id="section-5.3.1-3">If no EIL option was provided, the safest choice of the intermediate nameserver is dealing the query as a normal case without EDNS0 option.<a href="#section-5.3.1-3" class="pilcrow">¶</a></p>
+<p id="section-5.3.1-4">If no EIL option was provided, but the intermediate nameserver want to be more aggressive, it can guess the isp location from the source IP of the query, then respond as if there was an EIL option with the guessed information. Clients can be benefit when the intermediate nameserver has a more precise IP location database than the authoritative server, especially in global public DNS service like GoogleDNS(8.8.8.8).<a href="#section-5.3.1-4" class="pilcrow">¶</a></p>
+<p id="section-5.3.1-5">Otherwise, if no matching is found, the intermediate nameserver MUST perform resolution as usual.<a href="#section-5.3.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="delegations-and-negative-answers">
+<section id="section-5.3.2">
+          <h4 id="name-delegations-and-negative-an">
+<a href="#section-5.3.2" class="section-number selfRef">5.3.2. </a><a href="#name-delegations-and-negative-an" class="section-name selfRef">Delegations and Negative Answers</a>
+          </h4>
+<p id="section-5.3.2-1">EIL's delegation case is similar with ECS, Additional and Authority Sections SHOULD ignore EIL.<a href="#section-5.3.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.3.2-2">For negative answers, authoritative servers return traditional negative answers without EIL.<a href="#section-5.3.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="deploy">
+<section id="section-5.4">
+        <h3 id="name-deploy">
+<a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-deploy" class="section-name selfRef">Deploy</a>
+        </h3>
+<div id="transitivity">
+<section id="section-5.4.1">
+          <h4 id="name-transitivity">
+<a href="#section-5.4.1" class="section-number selfRef">5.4.1. </a><a href="#name-transitivity" class="section-name selfRef">Transitivity</a>
+          </h4>
+<p id="section-5.4.1-1">EIL's transitivity concerns are similar with ECS.<a href="#section-5.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.4.1-2">Name servers should only enable EIL where it is expected to benefit the end clients, such as dealing with some latency-sensitive CDN domain queries in a complex network environment.<a href="#section-5.4.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="compatibility-with-non-edns-and-ecs">
+<section id="section-5.4.2">
+          <h4 id="name-compatibility-with-non-edns">
+<a href="#section-5.4.2" class="section-number selfRef">5.4.2. </a><a href="#name-compatibility-with-non-edns" class="section-name selfRef">Compatibility with non-EDNS and ECS</a>
+          </h4>
+<p id="section-5.4.2-1">GeoIP-enabled authoritative servers can simply add EIL support.<a href="#section-5.4.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.4.2-2">Recursive Resolvers can add EIL support, and make the compatible policy with ECS and EIL.<a href="#section-5.4.2-2" class="pilcrow">¶</a></p>
+<p id="section-5.4.2-3">The indicator that authoritative servers used to generate tailor response is showed as follows:<a href="#section-5.4.2-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.4.2-4.1">RRIP: Recursive Resolver's IP<a href="#section-5.4.2-4.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-5.4.2-4.2">ECS: Client Subnet<a href="#section-5.4.2-4.2" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-5.4.2-4.3">
+              <p id="section-5.4.2-4.3.1">EIL: Client Isp Location<a href="#section-5.4.2-4.3.1" class="pilcrow">¶</a></p>
+<p id="section-5.4.2-4.3.2">
++--------------------+----------------------=-------------------------------------+
+  | Recursive Resolver |                                    AUTH                    |
+  |                    | non-EDNS | ECS but non-EIL | EIL but non-ECS | ECS and EIL |
+  +--------------------+----------+-----------------+-----------------+-------------+
+  | non-EDNS           | RRIP     | RRIP            | RRIP            | RRIP        | 
+  +-------------------------------+-----------------+-----------------+-------------+
+  | ECS but non-EIL    | RRIP     | ECS             | RRIP            | ECS         |
+  +-------------------------------+-----------------+-----------------+-------------+
+  | EIL but non-ECS    | RRIP     | RRIP            | EIL             | EIL         |
+  +--------------------+----------+-----------------+-----------------+-------------+
+  | ECS and EIL        | RRIP     | ECS             | EIL             | ECS/EIL     |
+  +--------------------+----------+-----------------+-----------------+-------------+<a href="#section-5.4.2-4.3.2" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</section>
+</div>
+<div id="intermediate-servers-support-ecs-and-eil-at-the-same-time">
+<section id="section-5.4.3">
+          <h4 id="name-intermediate-servers-suppor">
+<a href="#section-5.4.3" class="section-number selfRef">5.4.3. </a><a href="#name-intermediate-servers-suppor" class="section-name selfRef">Intermediate Servers Support ECS and EIL at the Same Time</a>
+          </h4>
+<p id="section-5.4.3-1">Intermediate nameservers can support ECS and EIL at the same time. However, ECS and EIL can't be both initiated at the same DNS packet.<a href="#section-5.4.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.4.3-2">To make more effort to protect user's privacy, we suggest that intermediate nameservers could initiate EIL query prior to ECS query. Alternative, they could send both ECS and EIL queries if not match in the cache.<a href="#section-5.4.3-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.4.3-3">
+<pre>
+Receive EIL query:
+    Search in EIL cache.
+    If cache is matched, return EIL response.
+    Otherwise,
+        Send EIL query.
+
+Receive ECS query:
+    Search in ECS cache.
+    If cache is matched, return ECS response.
+    Otherwise,
+        Send ECS query.
+
+Receive plain DNS query without EDNS option:
+    Search in ECS cache.
+    If cache is matched, return ECS response.
+    Otherwise,
+        Guess the isp location information of the client's IP,
+        Search in EIL cache.
+        If cache is matched, return EIL response.
+        Otherwise,
+            Send EIL query.
+            If authoritative server supports EIL, return EIL response.
+            Otherwise,
+                Send ECS query.
+                If authoritative server supports ECS, return ECS response.
+                Otherwise,
+                    Send plain DNS query.
+
+
+Receive plain DNS query with not-ECS/not-EIL option:
+    Search in not-EDNS cache.
+    If cache is matched, return response.
+    Otherwise,
+        Send plain DNS query.
+
+Receive ECS query, improve user privacy with EIL:
+    Guess the isp location information of the client's IP,
+    Search in EIL cache.
+    If cache is matched, return EIL response RR with origin ECS option.
+    Otherwise,
+         Send EIL query.
+</pre><a href="#section-5.4.3-3" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="why-not-use-as-number-to-build-eil">
+<section id="section-5.5">
+        <h3 id="name-why-not-use-as-number-to-bu">
+<a href="#section-5.5" class="section-number selfRef">5.5. </a><a href="#name-why-not-use-as-number-to-bu" class="section-name selfRef">Why not use AS number to build EIL</a>
+        </h3>
+<p id="section-5.5-1">AS number is not an ideal object to balance between response accuracy and user privacy, for example:<a href="#section-5.5-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.5-2.1">User privacy: AS24151 can directly guide to China Internet Network Infomation Center, it is not good for user privacy.<a href="#section-5.5-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-5.5-2.2">Response accurancy: AS4134 contains a huge amount of IP prefixes whose geolocation covers from South China to North China, AS number can not afford the response accuracy consideration.<a href="#section-5.5-2.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-5.5-3">Maybe &lt; COUNTRY-CODE, AREA-CODE, ISP, AS-NUMBER &gt; is a considerable trade-off choice.<a href="#section-5.5-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="benefit-and-cost">
+<section id="section-6">
+      <h2 id="name-benefit-and-cost">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-benefit-and-cost" class="section-name selfRef">Benefit and Cost</a>
+      </h2>
+<div id="client-1">
+<section id="section-6.1">
+        <h3 id="name-client-2">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-client-2" class="section-name selfRef">Client</a>
+        </h3>
+<p id="section-6.1-1">EIL is transparent to client.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1-2">EIL is to help mitigate client subnet leakage on the resolution path, improve user privacy.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="recursive-resolver-1">
+<section id="section-6.2">
+        <h3 id="name-recursive-resolver-2">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-recursive-resolver-2" class="section-name selfRef">Recursive Resolver</a>
+        </h3>
+<p id="section-6.2-1">ECS sends the query with client subnet, which means that recursive resolvers have to send a new query to authoritative servers with client_subnet_b, even it has known the response about network topological close client_subnet_a. In fact, thousands of subnets visit only a few servers, there are many redundacy queries, the recursive's cache hitrate is low.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-2">Because of ECS's low cache hitrate, recursive resolvers's ECS tailored response latency will be longer, the average of response time will rise with the redundacy queries rate from recursive resolvers to authoritative servers.<a href="#section-6.2-2" class="pilcrow">¶</a></p>
+<p id="section-6.2-3">Recursive resolver's ECS cache size grows up with the number of client subnets, see also <span>[<a href="#EIL-Qshine" class="cite xref">EIL-Qshine</a>]</span> and <span>[<a href="#EIL-PST" class="cite xref">EIL-PST</a>]</span>.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
+<p id="section-6.2-4">To sum it up, above problems all rise with the client subnet amount, especially when IPv6 addresses boom. Extend the subnet range in the ECS response may be mitigating, but not work for wide range client subnets. Recursive can make some guess optimization, if it has known response for client_subnet_a, then guess to return the same response for toplogical close client_subnet_b without send the redundancy query.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
+<p id="section-6.2-5">Therefore, if the ECS revision wants to make more effective client subnets aggregation for recursive resolver, then EIL can be an considerable choice.
+EIL wants to summary network toplogical close client subnets into &lt; COUNTRY, AREA, ISP &gt; for GeoIP-enabled authoritative server.
+With EIL response cache, recursive resolvers can directly response for many ECS client subnets queries, which will rise cache hitrate and reduce response latency.
+The cache size of EIL is related to the row count in the &lt; COUNTRY, AREA, ISP &gt; isp location whitelist. Therefore, under IPv6 environment, the cache size of EIL will be much smaller than ECS.<a href="#section-6.2-5" class="pilcrow">¶</a></p>
+<p id="section-6.2-6">Note that, the EIL's IP2Geo mapping work will make recursive resolver to more computational cost.<a href="#section-6.2-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="geoip-enabled-authoritative-server-1">
+<section id="section-6.3">
+        <h3 id="name-geoip-enabled-authoritative-">
+<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-geoip-enabled-authoritative-" class="section-name selfRef">GeoIP-enabled Authoritative Server</a>
+        </h3>
+<p id="section-6.3-1">Client subnet is the best factor if the company has good network topology monitor ability, offen is for big company.
+However, for many authoritative servers that only deployed GeoDNS, the accuracy limitation is commonly because of the IP2Geo database quality, and the small ISPs change to another next-hop big ISP suddenly.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+<p id="section-6.3-2">For the GeoIP-enabled authoritative server, the response accurancy depends on the IP geolocation database quality. If authoritative server can not find approximate isp location of ECS's client subnet, they can not return best tailored response.<a href="#section-6.3-2" class="pilcrow">¶</a></p>
+<p id="section-6.3-3">Even though GeoIP-enabled authoritative servers know about the precise isp location of ECS's client subnet, they may not know about the latest toplogical path change of the isp to update the tailored response in time.
+In the case of "small ISP -&gt; big ISP (change frequency) -&gt; ...  -&gt; website", both small ISP's client ip/resolver ip is not good factor for GeoDNS. 
+Big companies work hard to catch up with the client ip's connect topology change, and adjust their authoritative servers' tailored response, but smaller companies only deploy IP2Geo may not afford.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+<p id="section-6.3-4">EIL wants to give downstream a chance to tell authoritative server its best path quickly and proactively, help to rise the response accuracy, avoid cross-isp visit, save IP transit cost for Data Provider.
+EIL directly provide sufficient information for the GeoIP-enabled authoritative server.
+Compared to ECS, EIL can reduce GeoIP-enabled authoritative server's dependence on the IP geolocation database quality.<a href="#section-6.3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-7">
+      <h2 id="name-security-considerations">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<div id="dnssec">
+<section id="section-7.1">
+        <h3 id="name-dnssec">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-dnssec" class="section-name selfRef">DNSSEC</a>
+        </h3>
+<p id="section-7.1-1">EIL is not signed.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="privacy">
+<section id="section-7.2">
+        <h3 id="name-privacy">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-privacy" class="section-name selfRef">Privacy</a>
+        </h3>
+<p id="section-7.2-1">The biggest privacy concern on ECS is that client subnet information is personally identifiable. The more domains publish their zones on a third-party authoritative server, the more end user privacy information can be gathered by the authoritative server according to the ECS queries.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+<p id="section-7.2-2">EIL is to improve user privacy which is inspired by ECS, prevented leaks in the client subnet information.<a href="#section-7.2-2" class="pilcrow">¶</a></p>
+<p id="section-7.2-3">Like ECS, EIL will leak the global zonefile configurations of the authoritative servers more easily than normal case.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="target-censorship">
+<section id="section-7.3">
+        <h3 id="name-target-censorship">
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-target-censorship" class="section-name selfRef">Target Censorship</a>
+        </h3>
+<p id="section-7.3-1">DNS traffic is plain text by default. It is easily to be blocked or poisoned by internet target censorship. To bypass the censorship, it is better to encrypt the DNS traffic or use some proxy tunnel.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+<p id="section-7.3-2">EIL's isp location information covers bigger area than ECS's client subnet information. Therefore, compared to ECS in plain text condition, EIL is weaker at blocking record attack, but stronger at targeted DNS poisoning attack.<a href="#section-7.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="ddos">
+<section id="section-7.4">
+        <h3 id="name-ddos">
+<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-ddos" class="section-name selfRef">DDoS</a>
+        </h3>
+<p id="section-7.4-1">To migrate the DDoS problem:<a href="#section-7.4-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.4-2.1">If an Authority Server receives a DNS query with unknown data in EIL option, it SHOULD return the default response whose EIL option with null value.<a href="#section-7.4-2.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-7.4-2.2">Nameservers OPTIONAL only implement EIL when the query is from a TCP connection.<a href="#section-7.4-2.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-7.4-3">More migration techniques described in <span>[<a href="#RFC7871" class="cite xref">RFC7871</a>]</span>, Section 11.3.<a href="#section-7.4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-8">
+      <h2 id="name-iana-considerations">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-8-1">This document defines EIL, need request IANA to assign a new EDNS0 option code to EIL.<a href="#section-8-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="acknowledgements">
+<section id="section-9">
+      <h2 id="name-acknowledgements">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-acknowledgements" class="section-name selfRef">Acknowledgements</a>
+      </h2>
+<p id="section-9-1">EIL is inspired by ECS, the authors especially thanks to C. Contavalli, W. van der Gaast, D. Lawrence, and W. Kumari.<a href="#section-9-1" class="pilcrow">¶</a></p>
+<p id="section-9-2">Thanks comments for Barry Raveendran Greene, Paul Vixie, Petr Špaček, Brian Hartvigsen, Ask Bjørn Hansen, Dave Lawrence.<a href="#section-9-2" class="pilcrow">¶</a></p>
+<p id="section-9-3">Thanks a lot to all in the DNSOP, DNSPRIV mailing list.<a href="#section-9-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="appendix-a-geoip-enabled-authoritative-servers-example">
+<section id="section-10">
+      <h2 id="name-appendix-a-geoip-enabled-au">
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-appendix-a-geoip-enabled-au" class="section-name selfRef">Appendix A. GeoIP-enabled Authoritative Servers Example</a>
+      </h2>
+<div id="bind">
+<section id="section-10.1">
+        <h3 id="name-bind">
+<a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-bind" class="section-name selfRef">BIND</a>
+        </h3>
+<p id="section-10.1-1">As described in <span>[<a href="#BIND-GeoIP" class="cite xref">BIND-GeoIP</a>]</span>, BIND 9.10 is able to use data from MaxMind GeoIP databases to achieve restrictions based on the (presumed) geographic location of that address. The ACL itself is still address-based, but the GeoIP-based specification mechanisms can easily populate an ACL with addresses in a certain geographic location.<a href="#section-10.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-10.1-2">
+<pre>
+acl "example" {
+  geoip country US;
+  geoip region CA;
+  geoip city "Redwood City"; /* names, etc., must be quoted if they contain spaces */
+};
+</pre><a href="#section-10.1-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="powerdns">
+<section id="section-10.2">
+        <h3 id="name-powerdns">
+<a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-powerdns" class="section-name selfRef">PowerDNS</a>
+        </h3>
+<p id="section-10.2-1">As described in <span>[<a href="#PowerDNS-GeoIP" class="cite xref">PowerDNS-GeoIP</a>]</span>, PowerDNS supports many geolocation placeholders, such as %co = 3-letter country, %cn = continent, %re = region, %ci = city.<a href="#section-10.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-10.2-2">
+<pre>
+domains:
+- domain: geo.example.com
+  ttl: 30
+  records:
+    geo.example.com:
+      - soa: ns1.example.com hostmaster.example.com 2014090125 7200 3600 1209600 3600
+      - ns:
+           content: ns1.example.com
+           ttl: 600
+      - ns: ns2.example.com
+      - mx: 10 mx.example.com
+    fin.eu.service.geo.example.com:
+      - a: 192.0.2.2
+      - txt: hello world
+      - aaaa: 2001:DB8::12:34DE:3
+    # this will result first record being handed out 30% of time
+    swe.eu.service.geo.example.com:
+      - a:
+           content: 192.0.2.3
+           weight: 50
+      - a: 192.0.2.4
+  services:
+    # syntax 1
+    service.geo.example.com: '%co.%cn.service.geo.example.com'
+    # syntax 2
+    service.geo.example.com: [ '%co.%cn.service.geo.example.com',
+                                        '%cn.service.geo.example.com']
+    # alternative syntax
+  services:
+    service.geo.example.com:
+      default: [ '%co.%cn.service.geo.example.com', '%cn.service.geo.example.com' ]
+      10.0.0.0/8: 'internal.service.geo.example.com'
+</pre><a href="#section-10.2-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="amazon">
+<section id="section-10.3">
+        <h3 id="name-amazon">
+<a href="#section-10.3" class="section-number selfRef">10.3. </a><a href="#name-amazon" class="section-name selfRef">Amazon</a>
+        </h3>
+<p id="section-10.3-1">As described in <span>[<a href="#Amazon-GeoIP" class="cite xref">Amazon-GeoIP</a>]</span>, Amazon Route 53 lets you choose the resources that serve your traffic based on the geographic location of your users, meaning the location that DNS queries originate from. It allows you to route some queries for a continent to one resource and to route queries for selected countries on that continent to a different resource.<a href="#section-10.3-1" class="pilcrow">¶</a></p>
+<p id="section-10.3-2">When a browser or other viewer uses a DNS resolver that does support edns-client-subnet, the DNS resolver sends Amazon Route 53 a truncated version of the client's IP address. Amazon Route 53 determines the location of the user based on the truncated IP address rather than the source IP address of the DNS resolver; this typically provides a more accurate estimate of the client's location. Amazon Route 53 then responds to geolocation queries with the DNS record for the client's location.<a href="#section-10.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="dyn">
+<section id="section-10.4">
+        <h3 id="name-dyn">
+<a href="#section-10.4" class="section-number selfRef">10.4. </a><a href="#name-dyn" class="section-name selfRef">DYN</a>
+        </h3>
+<p id="section-10.4-1">As described in <span>[<a href="#DYN-GeoIP" class="cite xref">DYN-GeoIP</a>]</span>, Dyn provides the ability to control DNS responses on a granular/customized geographical rule set. Part of the rulesets will be the identification of the global regions, countries, or states and provinces that use a specific DNS server group. DYN uses the ECS information for the geolocation lookup. Once a geolocation is found and a response is selected, it will provide a DNS response back to the source IP address.<a href="#section-10.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="gdnsd">
+<section id="section-10.5">
+        <h3 id="name-gdnsd">
+<a href="#section-10.5" class="section-number selfRef">10.5. </a><a href="#name-gdnsd" class="section-name selfRef">gdnsd</a>
+        </h3>
+<p id="section-10.5-1">As described in <span>[<a href="#gdnsd-GeoIP" class="cite xref">gdnsd-GeoIP</a>]</span>, gdnsd uses MaxMind's GeoIP binary databases to map address and CNAME results based on geography and monitored service availability. gdnsd supports geolocation codes, such as continent, country, region/subdivision, city.<a href="#section-10.5-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="windows-server">
+<section id="section-10.6">
+        <h3 id="name-windows-server">
+<a href="#section-10.6" class="section-number selfRef">10.6. </a><a href="#name-windows-server" class="section-name selfRef">Windows Server</a>
+        </h3>
+<p id="section-10.6-1">As described in <span>[<a href="#WindowsServer-GeoIP" class="cite xref">WindowsServer-GeoIP</a>]</span>, Windows server can be configured DNS Policy to respond to DNS client queries based on the geographical location of both the client and the resource to which the client is attempting to connect, providing the client with the IP address of the closest resource.<a href="#section-10.6-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="appendix-b-eil-example">
+<section id="section-11">
+      <h2 id="name-appendix-b-eil-example">
+<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-appendix-b-eil-example" class="section-name selfRef">Appendix B. EIL Example</a>
+      </h2>
+<p id="section-11-1">authoritative server of www.example.com has enabled EIL.<a href="#section-11-1" class="pilcrow">¶</a></p>
+<p id="section-11-2">Stub DNS query A resource record of www.example.com .<a href="#section-11-2" class="pilcrow">¶</a></p>
+<div id="p-model">
+<section id="section-11.1">
+        <h3 id="name-p-model">
+<a href="#section-11.1" class="section-number selfRef">11.1. </a><a href="#name-p-model" class="section-name selfRef">P-Model</a>
+        </h3>
+<div class="alignLeft art-text artwork" id="section-11.1-1">
+<pre>
+Stub DNS
+-&gt; local forwarding resolver (61.48.7.2)
+-&gt; Public Forwarding Resolver(AliDNS, 223.5.5.5)
+-&gt; Public recursive resolver(AliDNS, 202.108.250.231)
+-&gt; authoritative server
+</pre><a href="#section-11.1-1" class="pilcrow">¶</a>
+</div>
+<p id="section-11.1-2">Public Forwarding Resolver 223.5.5.5 could enable EIL and generate the EIL OPT data &lt; CN, 11, UNI &gt; based on 61.48.7.2.<a href="#section-11.1-2" class="pilcrow">¶</a></p>
+<p id="section-11.1-3">P-Model will not leak client subnet to authoritative server.<a href="#section-11.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="i-model">
+<section id="section-11.2">
+        <h3 id="name-i-model">
+<a href="#section-11.2" class="section-number selfRef">11.2. </a><a href="#name-i-model" class="section-name selfRef">I-Model</a>
+        </h3>
+<div class="alignLeft art-text artwork" id="section-11.2-1">
+<pre>
+Stub DNS
+-&gt; local forwarding resolver
+-&gt; ISP Forwarding Resolver(202.106.196.115)
+-&gt; ISP recursive resolver(61.135.23.92)
+-&gt; authoritative server
+</pre><a href="#section-11.2-1" class="pilcrow">¶</a>
+</div>
+<p id="section-11.2-2">ISP recursive resolver 61.135.23.92 could enable EIL and generate the EIL OPT data &lt; CN, 11, UNI &gt; based on 61.135.23.92.<a href="#section-11.2-2" class="pilcrow">¶</a></p>
+<p id="section-11.2-3">If authoritative server doesn't know much about 61.135.23.92, EIL will be helpful.<a href="#section-11.2-3" class="pilcrow">¶</a></p>
+<p id="section-11.2-4">ISP recursive resolver generates static EIL query, simply manages response cache as tranditionl non-ECS/non-EIL scenario.<a href="#section-11.2-4" class="pilcrow">¶</a></p>
+<p id="section-11.2-5">EIL helps ISP recursive resolver to give upstream an explicit correct isp location information.<a href="#section-11.2-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="l-model">
+<section id="section-11.3">
+        <h3 id="name-l-model">
+<a href="#section-11.3" class="section-number selfRef">11.3. </a><a href="#name-l-model" class="section-name selfRef">L-Model</a>
+        </h3>
+<div class="alignLeft art-text artwork" id="section-11.3-1">
+<pre>
+Stub DNS
+-&gt; Local Fowarding Resolver(58.60.109.234)
+-&gt; ...
+-&gt; authoritative server
+</pre><a href="#section-11.3-1" class="pilcrow">¶</a>
+</div>
+<p id="section-11.3-2">Local Fowarding Resolver 58.60.109.234 could enable EIL and generate the option data is &lt; CN, 44, TEL &gt; based on 58.60.109.234.<a href="#section-11.3-2" class="pilcrow">¶</a></p>
+<p id="section-11.3-3">L-Model can give the most precisely isp location information for DNS resolution.<a href="#section-11.3-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="appendix-c-frequent-geoip-enabled-authoritative-servers-response-accuracy-problem">
+<section id="section-12">
+      <h2 id="name-appendix-c-frequent-geoip-e">
+<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-appendix-c-frequent-geoip-e" class="section-name selfRef">Appendix C. Frequent GeoIP-enabled Authoritative Server's Response Accuracy Problem</a>
+      </h2>
+<div id="public-recursive-resolver-with-non-ecs-authoritative-server">
+<section id="section-12.1">
+        <h3 id="name-public-recursive-resolver-w">
+<a href="#section-12.1" class="section-number selfRef">12.1. </a><a href="#name-public-recursive-resolver-w" class="section-name selfRef">Public Recursive Resolver with non-ECS Authoritative Server</a>
+        </h3>
+<p id="section-12.1-1">If authoritative server doesn't support ECS, the clients that use public recursive resolver(such as 8.8.8.8) may receive disaster latency IP.<a href="#section-12.1-1" class="pilcrow">¶</a></p>
+<p id="section-12.1-2">In this scenario, we must pray that public recursive resolver's IP is network topological close to client's IP.<a href="#section-12.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="ip2geo-database-quality">
+<section id="section-12.2">
+        <h3 id="name-ip2geo-database-quality">
+<a href="#section-12.2" class="section-number selfRef">12.2. </a><a href="#name-ip2geo-database-quality" class="section-name selfRef">IP2Geo Database Quality</a>
+        </h3>
+<p id="section-12.2-1">If authoritative server's IP2Geo database misidentify client IP's information, then the client may be assigned to some high letency cross-isp IP address.<a href="#section-12.2-1" class="pilcrow">¶</a></p>
+<p id="section-12.2-2">With EIL, public recursive resolver and ISP recursive resolver can help to give more precise information for GeoIP-enabled authoritative servers.<a href="#section-12.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="unstable-isp-network-topology">
+<section id="section-12.3">
+        <h3 id="name-unstable-isp-network-topolo">
+<a href="#section-12.3" class="section-number selfRef">12.3. </a><a href="#name-unstable-isp-network-topolo" class="section-name selfRef">Unstable ISP Network Topology</a>
+        </h3>
+<p id="section-12.3-1">Some small ISPs may change their upstreams frequently. authoritative servers offen can not catch up the variation in time.<a href="#section-12.3-1" class="pilcrow">¶</a></p>
+<p id="section-12.3-2">EIL gives downstream a chance to proactively tell authoritative servers the latest best topological close response itself wants now. Downstream can assure itself has got explicit tailored response with EIL.<a href="#section-12.3-2" class="pilcrow">¶</a></p>
+<p id="section-12.3-3">For example, 218.247.200.100's isp location information is &lt; China, Beijing, PengBoShi &gt;. In I-Model, PengBoShi's resolver can send EIL &lt; CN, 11, TEL &gt; to authoritative servers, indicates that the best topological close response forclient 218.247.200.100 is from China Beijing Telecom.<a href="#section-12.3-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<section id="section-13">
+      <h2 id="name-references">
+<a href="#section-13" class="section-number selfRef">13. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-13.1">
+        <h3 id="name-normative-references">
+<a href="#section-13.1" class="section-number selfRef">13.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC1034">[RFC1034]</dt>
+        <dd>
+<span class="refAuthor">Mockapetris, P.</span>, <span class="refTitle">"Domain names - concepts and facilities"</span>, <span class="seriesInfo">STD 13</span>, <span class="seriesInfo">RFC 1034</span>, <span class="seriesInfo">DOI 10.17487/RFC1034</span>, <time datetime="1987-11" class="refDate">November 1987</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc1034">https://www.rfc-editor.org/info/rfc1034</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC1035">[RFC1035]</dt>
+        <dd>
+<span class="refAuthor">Mockapetris, P.</span>, <span class="refTitle">"Domain names - implementation and specification"</span>, <span class="seriesInfo">STD 13</span>, <span class="seriesInfo">RFC 1035</span>, <span class="seriesInfo">DOI 10.17487/RFC1035</span>, <time datetime="1987-11" class="refDate">November 1987</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc1035">https://www.rfc-editor.org/info/rfc1035</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC1700">[RFC1700]</dt>
+        <dd>
+<span class="refAuthor">Reynolds, J.</span> and <span class="refAuthor">J. Postel</span>, <span class="refTitle">"Assigned Numbers"</span>, <span class="seriesInfo">RFC 1700</span>, <span class="seriesInfo">DOI 10.17487/RFC1700</span>, <time datetime="1994-10" class="refDate">October 1994</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc1700">https://www.rfc-editor.org/info/rfc1700</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6891">[RFC6891]</dt>
+        <dd>
+<span class="refAuthor">Damas, J.</span>, <span class="refAuthor">Graff, M.</span>, and <span class="refAuthor">P. Vixie</span>, <span class="refTitle">"Extension Mechanisms for DNS (EDNS(0))"</span>, <span class="seriesInfo">STD 75</span>, <span class="seriesInfo">RFC 6891</span>, <span class="seriesInfo">DOI 10.17487/RFC6891</span>, <time datetime="2013-04" class="refDate">April 2013</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc6891">https://www.rfc-editor.org/info/rfc6891</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7871">[RFC7871]</dt>
+        <dd>
+<span class="refAuthor">Contavalli, C.</span>, <span class="refAuthor">van der Gaast, W.</span>, <span class="refAuthor">Lawrence, D.</span>, and <span class="refAuthor">W. Kumari</span>, <span class="refTitle">"Client Subnet in DNS Queries"</span>, <span class="seriesInfo">RFC 7871</span>, <span class="seriesInfo">DOI 10.17487/RFC7871</span>, <time datetime="2016-05" class="refDate">May 2016</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7871">https://www.rfc-editor.org/info/rfc7871</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8499">[RFC8499]</dt>
+      <dd>
+<span class="refAuthor">Hoffman, P.</span>, <span class="refAuthor">Sullivan, A.</span>, and <span class="refAuthor">K. Fujiwara</span>, <span class="refTitle">"DNS Terminology"</span>, <span class="seriesInfo">BCP 219</span>, <span class="seriesInfo">RFC 8499</span>, <span class="seriesInfo">DOI 10.17487/RFC8499</span>, <time datetime="2019-01" class="refDate">January 2019</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8499">https://www.rfc-editor.org/info/rfc8499</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-13.2">
+        <h3 id="name-informative-references">
+<a href="#section-13.2" class="section-number selfRef">13.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="Amazon-GeoIP">[Amazon-GeoIP]</dt>
+        <dd>
+<span class="refAuthor">Amazon</span>, <span class="refTitle">"Amazon Route 53 Geolocation Routing"</span>, <span>n.d.</span>, <span>&lt;<a href="http://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html#routing-policy-geo">http://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html#routing-policy-geo</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="BIND-GeoIP">[BIND-GeoIP]</dt>
+        <dd>
+<span class="refAuthor">ISC</span>, <span class="refTitle">"Using the GeoIP Features in BIND 9.10"</span>, <span>n.d.</span>, <span>&lt;<a href="https://kb.isc.org/article/AA-01149/0">https://kb.isc.org/article/AA-01149/0</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="ClientSubnet-Bis">[ClientSubnet-Bis]</dt>
+        <dd>
+<span class="refAuthor">Sivaraman, M.</span>, <span class="refTitle">"CLIENT-SUBNET bis appetite?"</span>, <span>n.d.</span>, <span>&lt;<a href="https://www.ietf.org/mail-archive/web/dnsop/current/msg21616.html">https://www.ietf.org/mail-archive/web/dnsop/current/msg21616.html</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="DYN-GeoIP">[DYN-GeoIP]</dt>
+        <dd>
+<span class="refAuthor">DYN</span>, <span class="refTitle">"Understanding How Traffic Director Makes Decisions"</span>, <span>n.d.</span>, <span>&lt;<a href="https://help.dyn.com/understanding-td-decisions/">https://help.dyn.com/understanding-td-decisions/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="ECS-Privacy">[ECS-Privacy]</dt>
+        <dd>
+<span class="refAuthor">Kintis, P.</span>, <span class="refTitle">"Understanding the Privacy Implications of ECS"</span>, <span>n.d.</span>, <span>&lt;<a href="https://link.springer.com/chapter/10.1007/978-3-319-40667-1_17">https://link.springer.com/chapter/10.1007/978-3-319-40667-1_17</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="EIL-PST">[EIL-PST]</dt>
+        <dd>
+<span class="refAuthor">Pan, L.</span>, <span class="refTitle">"Mitigating Client Subnet Leakage in DNS Queries"</span>, <span>n.d.</span>, <span>&lt;<a href="https://ieeexplore.ieee.org/document/8514164">https://ieeexplore.ieee.org/document/8514164</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="EIL-Qshine">[EIL-Qshine]</dt>
+        <dd>
+<span class="refAuthor">Pan, L.</span>, <span class="refTitle">"Improving Privacy for GeoIP DNS Traffic"</span>, <span>n.d.</span>, <span>&lt;<a href="https://eudl.eu/doi/10.1007/978-3-030-14413-5_1">https://eudl.eu/doi/10.1007/978-3-030-14413-5_1</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="gdnsd-GeoIP">[gdnsd-GeoIP]</dt>
+        <dd>
+<span class="refAuthor">gdnsd</span>, <span class="refTitle">"GdnsdPluginGeoip"</span>, <span>n.d.</span>, <span>&lt;<a href="https://github.com/gdnsd/gdnsd/wiki/GdnsdPluginGeoip">https://github.com/gdnsd/gdnsd/wiki/GdnsdPluginGeoip</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="ISO3166">[ISO3166]</dt>
+        <dd>
+<span class="refAuthor">ISO</span>, <span class="refTitle">"Country Codes"</span>, <span>n.d.</span>, <span>&lt;<a href="http://www.iso.org/iso/country_codes">http://www.iso.org/iso/country_codes</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="PowerDNS-GeoIP">[PowerDNS-GeoIP]</dt>
+        <dd>
+<span class="refAuthor">PowerDNS</span>, <span class="refTitle">"PowerDNS GeoIP backend"</span>, <span>n.d.</span>, <span>&lt;<a href="https://doc.powerdns.com/md/authoritative/backend-geoip/">https://doc.powerdns.com/md/authoritative/backend-geoip/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="WindowsServer-GeoIP">[WindowsServer-GeoIP]</dt>
+      <dd>
+<span class="refAuthor">Microsoft</span>, <span class="refTitle">"Use DNS Policy for Geo-Location Based Traffic Management with Primary Servers"</span>, <span>n.d.</span>, <span>&lt;<a href="https://docs.microsoft.com/en-us/windows-server/networking/dns/deploy/primary-geo-location">https://docs.microsoft.com/en-us/windows-server/networking/dns/deploy/primary-geo-location</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+<div id="authors-addresses">
+<section id="appendix-A">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Lanlan Pan</span></div>
+<div dir="auto" class="left"><span class="locality">Guangdong</span></div>
+<div dir="auto" class="left"><span class="country-name">China</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:abbypan@gmail.com" class="email">abbypan@gmail.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Yu Fu</span></div>
+<div dir="auto" class="left"><span class="org">China Unicom</span></div>
+<div dir="auto" class="left"><span class="locality">Beijing</span></div>
+<div dir="auto" class="left"><span class="country-name">China</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:fuy186@chinaunicom.cn" class="email">fuy186@chinaunicom.cn</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Cuicui Wang</span></div>
+<div dir="auto" class="left"><span class="org">China Unicom</span></div>
+<div dir="auto" class="left"><span class="locality">Beijing</span></div>
+<div dir="auto" class="left"><span class="country-name">China</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:wangcc107@chinaunicom.cn" class="email">wangcc107@chinaunicom.cn</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
