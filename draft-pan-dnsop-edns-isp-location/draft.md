@@ -1,7 +1,7 @@
 ---
 title: ISP Location in DNS Queries
 abbrev: EIL
-docname: draft-pan-dnsop-edns-isp-location-05
+docname: draft-pan-dnsop-edns-isp-location-06
 date: 2024-01-15
 
 # stand_alone: true
@@ -439,18 +439,19 @@ The indicator that authoritative servers used to generate tailor response is sho
 * EIL: Client Isp Location
 
 
-    +--------------------+----------------------=-------------------------------------+
-    | Recursive Resolver |                                    AUTH                    |
-    |                    | non-EDNS | ECS but non-EIL | EIL but non-ECS | ECS and EIL |
-    +--------------------+----------+-----------------+-----------------+-------------+
-    | non-EDNS           | RRIP     | RRIP            | RRIP            | RRIP        | 
-    +-------------------------------+-----------------+-----------------+-------------+
-    | ECS but non-EIL    | RRIP     | ECS             | RRIP            | ECS         |
-    +-------------------------------+-----------------+-----------------+-------------+
-    | EIL but non-ECS    | RRIP     | RRIP            | EIL             | EIL         |
-    +--------------------+----------+-----------------+-----------------+-------------+
-    | ECS and EIL        | RRIP     | ECS             | EIL             | ECS/EIL     |
-    +--------------------+----------+-----------------+-----------------+-------------+
+        +--------------------+----------------------=-------------------------------------+
+        | Recursive Resolver |                                    AUTH                    |
+        |                    | non-EDNS | ECS but non-EIL | EIL but non-ECS | ECS and EIL |
+        +--------------------+----------+-----------------+-----------------+-------------+
+        | non-EDNS           | RRIP     | RRIP            | RRIP            | RRIP        | 
+        +-------------------------------+-----------------+-----------------+-------------+
+        | ECS but non-EIL    | RRIP     | ECS             | RRIP            | ECS         |
+        +-------------------------------+-----------------+-----------------+-------------+
+        | EIL but non-ECS    | RRIP     | RRIP            | EIL             | EIL         |
+        +--------------------+----------+-----------------+-----------------+-------------+
+        | ECS and EIL        | RRIP     | ECS             | EIL             | ECS/EIL     |
+        +--------------------+----------+-----------------+-----------------+-------------+
+        
 
 ### Intermediate Servers Support ECS and EIL at the Same Time
 

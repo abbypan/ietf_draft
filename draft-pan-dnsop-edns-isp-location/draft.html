@@ -20,7 +20,7 @@ It will directly provide sufficient information for the GeoIP-enabled authoritat
     " name="description">
 <meta content="xml2rfc 3.18.0" name="generator">
 <meta content="Internet-Draft" name="keyword">
-<meta content="draft-pan-dnsop-edns-isp-location-05" name="ietf.draft">
+<meta content="draft-pan-dnsop-edns-isp-location-06" name="ietf.draft">
 <!-- Generator version information:
   xml2rfc 3.18.0
     Python 3.11.6
@@ -1225,7 +1225,7 @@ li > p:last-of-type:only-child {
 <dt class="label-workgroup">Workgroup:</dt>
 <dd class="workgroup">dnsop</dd>
 <dt class="label-internet-draft">Internet-Draft:</dt>
-<dd class="internet-draft">draft-pan-dnsop-edns-isp-location-05</dd>
+<dd class="internet-draft">draft-pan-dnsop-edns-isp-location-06</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
 <time datetime="2024-01-15" class="published">15 January 2024</time>
@@ -1811,19 +1811,22 @@ Recursive resolver that supporting EIL must only cache the EIL responses matched
 </li>
             <li class="normal" id="section-5.4.2-4.3">
               <p id="section-5.4.2-4.3.1">EIL: Client Isp Location<a href="#section-5.4.2-4.3.1" class="pilcrow">¶</a></p>
-<p id="section-5.4.2-4.3.2">
-+--------------------+----------------------=-------------------------------------+
+<div class="alignLeft art-text artwork" id="section-5.4.2-4.3.2">
+<pre>
+  +--------------------+----------------------=-------------------------------------+
   | Recursive Resolver |                                    AUTH                    |
   |                    | non-EDNS | ECS but non-EIL | EIL but non-ECS | ECS and EIL |
   +--------------------+----------+-----------------+-----------------+-------------+
-  | non-EDNS           | RRIP     | RRIP            | RRIP            | RRIP        | 
+  | non-EDNS           | RRIP     | RRIP            | RRIP            | RRIP        |
   +-------------------------------+-----------------+-----------------+-------------+
   | ECS but non-EIL    | RRIP     | ECS             | RRIP            | ECS         |
   +-------------------------------+-----------------+-----------------+-------------+
   | EIL but non-ECS    | RRIP     | RRIP            | EIL             | EIL         |
   +--------------------+----------+-----------------+-----------------+-------------+
   | ECS and EIL        | RRIP     | ECS             | EIL             | ECS/EIL     |
-  +--------------------+----------+-----------------+-----------------+-------------+<a href="#section-5.4.2-4.3.2" class="pilcrow">¶</a></p>
+  +--------------------+----------+-----------------+-----------------+-------------+
+</pre><a href="#section-5.4.2-4.3.2" class="pilcrow">¶</a>
+</div>
 </li>
           </ul>
 </section>
