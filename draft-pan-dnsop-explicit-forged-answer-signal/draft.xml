@@ -18,7 +18,7 @@
 ]>
 
 
-<rfc ipr="trust200902" docName="draft-pan-dnsop-explicit-forged-answer-signal-00" category="info" submissionType="IETF" tocInclude="true" sortRefs="true" symRefs="true">
+<rfc ipr="trust200902" docName="draft-pan-dnsop-explicit-forged-answer-signal-01" category="bcp" consensus="true" submissionType="IETF" tocInclude="true" sortRefs="true" symRefs="true">
   <front>
     <title abbrev="EFAS">Explicit Forged Answer Signal</title>
 
@@ -33,7 +33,7 @@
       </address>
     </author>
 
-    <date year="2024" month="January" day="10"/>
+    <date year="2024" month="August" day="20"/>
 
     <area>ops</area>
     <workgroup>dnsop</workgroup>
@@ -44,9 +44,9 @@
 
 <?line 112?>
 
-<t>This document describes that recursive resolver should give explict signal in the forged answer.</t>
+<t>This document describes about the forged answer provided by recursive resolver.</t>
 
-<t>Client could react more clearly based on the explict forged answer signal, to protect user on security and privacy.</t>
+<t>Client could protect user on security and privacy more efficiently if recursive resolver gives explict signal in the forged answer.</t>
 
 
 
@@ -61,33 +61,13 @@
 
 <?line 118?>
 
-<section anchor="background-and-motivation"><name>Background and Motivation</name>
+<section anchor="background"><name>Background</name>
 
-<t>Recursive server may replace a forged answer to a query with a configured answer of the authoritative server
-in some specific scenarios, 
+<t>Recursive resolver may make a forged answer for a dns query in some specific scenarios, 
 such as NXDOMAIN, phishing, fraud, malware, ransomware, botnet DDoS attack, and legal requirement, etc.
 See also <xref target="NXRedierct"/> <xref target="ISPRedirect"/> <xref target="DNSFirewall"/> <xref target="LegalRedirect"/>.</t>
 
 <t>The RCODE of faked answer is NOERROR, which make client hard to distinguish it with honest answer, if client doesn't make iterative dns query by itself, or make DNSSEC validation.</t>
-
-<t>At least, the client has the right to know that it has received a forged answer and it could make clearer reaction by itself.</t>
-
-</section>
-<section anchor="terminology"><name>Terminology</name>
-
-<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
-document are to be interpreted as described in <xref target="RFC2119"/>.</t>
-
-<t>Basic terms used in this specification are defined in the documents <xref target="RFC1034"/>, <xref target="RFC1035"/>, <xref target="RFC8499"/>.</t>
-
-<t><list style="symbols">
-  <t>Authoritative Server: Described in <xref target="RFC8499"/>.</t>
-  <t>Recursive Resolver: Described in <xref target="RFC8499"/>.</t>
-</list></t>
-
-</section>
-<section anchor="attack-surface"><name>Attack Surface</name>
 
 <t>Faked answer can avoid user to visit malicious website, however, it may also increase the security and privacy risk.</t>
 
@@ -105,27 +85,29 @@ document are to be interpreted as described in <xref target="RFC2119"/>.</t>
 
 </section>
 </section>
-<section anchor="explicit-forged-answer-signal"><name>Explicit Forged Answer Signal</name>
+<section anchor="terminology"><name>Terminology</name>
 
-<t>Recursive resolver should give explict forged answer signal to client.</t>
+<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+document are to be interpreted as described in <xref target="RFC2119"/>.</t>
 
-<section anchor="format-1-use-extended-dns-errors"><name>Format 1: Use Extended DNS Errors</name>
-
-<t><xref target="RFC8914"/> defined Extended DNS Errors (EDE) extension.</t>
-
-<t>Recursive resolver could give the signal by include additional EDE information in DNS response:</t>
+<t>Basic terms used in this specification are defined in the documents <xref target="RFC1034"/>, <xref target="RFC1035"/>, <xref target="RFC8499"/>.</t>
 
 <t><list style="symbols">
-  <t>INFO-Code is 4.</t>
-  <t>EXTRA-TEXT is the specific scenario desciption, for example, malware.</t>
+  <t>Authoritative Server: Described in <xref target="RFC8499"/>.</t>
+  <t>Recursive Resolver: Described in <xref target="RFC8499"/>.</t>
 </list></t>
 
 </section>
-<section anchor="format-2-use-txt-rr"><name>Format 2: Use TXT RR</name>
+<section anchor="explicit-forged-answer-signal"><name>Explicit Forged Answer Signal</name>
 
-<t><xref target="RFC1035"/> defined TXT RDATA format.</t>
+<t>To avoid the HTTP cookies leakage, the recursive resolver is responsible for giving explict forged answer signal to client, and client could make its own reaction when it received an explict forged answer signal from recursive resolver.</t>
 
-<t>Recursive resolver could give the signal by include additional TXT RR in DNS response, such as:</t>
+<section anchor="recursive-resolver"><name>Recursive Resolver</name>
+
+<t>Recursive resolver could give the explict forged answer signal by including an additional Extended DNS Errors (EDE) information in DNS response, which is defined in <xref target="RFC8914"/>.</t>
+
+<t>Alternatively, recursive resolver could include an TXT RR in DNS answer section, such as:</t>
 
 <figure><artwork><![CDATA[
 abc.example.com  300 IN  A  1.2.3.4
@@ -133,33 +115,13 @@ abc.example.com  300 IN  TXT  "faked=malware"
 ]]></artwork></figure>
 
 </section>
-</section>
-<section anchor="client-reaction"><name>Client Reaction</name>
+<section anchor="client"><name>Client</name>
 
-<t>Client could make its own reaction when it received an explict forged answer signal from recursive resolver.</t>
-
-<section anchor="reaction-1-use-dnssec"><name>Reaction 1: Use DNSSEC</name>
-
-<t>Client could make DNSSEC query by itself.</t>
-
-<t>If the domain has deployed DNSSEC, the client could validate the honest answer from authoritative server.</t>
-
-</section>
-<section anchor="reaction-2-change-recursive-resolver"><name>Reaction 2: Change Recursive Resolver</name>
-
-<t>Client could change to another recursive resolver which is not lying.</t>
-
-</section>
-<section anchor="reaction-3-stop-visit"><name>Reaction 3: Stop Visit</name>
-
-<t>Client could stop to visit on the website, since it knows that the answer is faked.</t>
-
-</section>
-<section anchor="reaction-4-limited-visit"><name>Reaction 4: Limited Visit</name>
-
-<t>Client could make limited visit on the website, prevent HTTP cookies from being send to the faked server.</t>
-
-<t>For example, browser should not send user's HTTP cookies to the faked server, if it gets an explict faked answer signal in the DoH response <xref target="RFC8484"/>.</t>
+<t>These four actions can be implemented on client to deal with the forged answer:
+- Use DNSSEC: Client could make DNSSEC query by itself. If the domain has deployed DNSSEC, the client could validate the honest answer from authoritative server.
+- Change Recursive Resolver: Client could change to another recursive resolver which is not lying.
+- Stop Visit: Client could stop to visit on the website, since it knows that the answer is faked.
+- Limited Visit: Client could make limited visit on the website, prevent HTTP cookies from being send to the faked server. For example, browser should not send user's HTTP cookies to the faked server, if it gets an explict faked answer signal in the DoH response <xref target="RFC8484"/>.</t>
 
 </section>
 </section>
@@ -167,11 +129,11 @@ abc.example.com  300 IN  TXT  "faked=malware"
 
 <t>Faked answer is unauthenticated by authoritative server, just offered by recursive resolver on some specific scenarios.</t>
 
-<t>Ideally, with the DNSSEC deployed on second level domain, client would not trust any faked answer if it makes all RRSIG validation by itself.</t>
+<t>With the DNSSEC deployed on second level domain, client would not trust any faked answer if it makes all RRSIG validation by itself.</t>
 
-<t>Explicit faked answer signal is to help client to make clearer reaction on faked answer, with the help of recursive resolver.</t>
+<t>Ideally, recursive resolver should be honest to client, give the explicit faked answer signal in DNS response.</t>
 
-<t>As a trade-off, explict faked answer signal could help browser to mitigate the http cookies leaked to faked server, protect user security and privacy in conditional limited environment.</t>
+<t>Explict faked answer signal could help browser to mitigate the http cookies leaked to faked server, protect user security and privacy in conditional limited environment.</t>
 
 </section>
 <section anchor="acknowledgements"><name>Acknowledgements</name>
@@ -259,78 +221,71 @@ abc.example.com  300 IN  TXT  "faked=malware"
     </references>
 
 
-<?line 245?>
+<?line 202?>
 
 
 
   </back>
 
 <!-- ##markdown-source:
-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
-aS0bAAA=
+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
+SnFDYml8M53iblctk7RMkuC/rFi6DtYXAAA=
 
 -->
 

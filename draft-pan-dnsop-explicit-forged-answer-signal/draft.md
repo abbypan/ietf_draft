@@ -1,8 +1,8 @@
 ---
 title: Explicit Forged Answer Signal
 abbrev: EFAS
-docname: draft-pan-dnsop-explicit-forged-answer-signal-00
-date: 2024-01-10
+docname: draft-pan-dnsop-explicit-forged-answer-signal-01
+date: 2024-08-20
 
 # stand_alone: true
 
@@ -11,7 +11,7 @@ ipr: trust200902
 area: ops
 wg: dnsop
 kw: Internet-Draft
-cat: info
+cat: bcp
 
 coding: utf-8
 pi:    # can use array (if all yes) or hash here
@@ -111,41 +111,20 @@ informative:
 
 --- abstract
 
-This document describes that recursive resolver should give explict signal in the forged answer.
+This document describes about the forged answer provided by recursive resolver.
 
-Client could react more clearly based on the explict forged answer signal, to protect user on security and privacy.
+Client could protect user on security and privacy more efficiently if recursive resolver gives explict signal in the forged answer. 
 
 --- middle
 
-Background and Motivation
-=========================
+Background
+==========
 
-Recursive server may replace a forged answer to a query with a configured answer of the authoritative server
-in some specific scenarios, 
+Recursive resolver may make a forged answer for a dns query in some specific scenarios, 
 such as NXDOMAIN, phishing, fraud, malware, ransomware, botnet DDoS attack, and legal requirement, etc.
 See also {{NXRedierct}} {{ISPRedirect}} {{DNSFirewall}} {{LegalRedirect}}.
 
 The RCODE of faked answer is NOERROR, which make client hard to distinguish it with honest answer, if client doesn't make iterative dns query by itself, or make DNSSEC validation.
-
-At least, the client has the right to know that it has received a forged answer and it could make clearer reaction by itself.
-
-
-Terminology
-===========
-
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
-document are to be interpreted as described in {{RFC2119}}.
-
-Basic terms used in this specification are defined in the documents {{RFC1034}}, {{RFC1035}}, {{RFC8499}}.
-
-* Authoritative Server: Described in {{RFC8499}}.
-
-* Recursive Resolver: Described in {{RFC8499}}. 
-
-
-Attack Surface
-==============
 
 Faked answer can avoid user to visit malicious website, however, it may also increase the security and privacy risk.
 
@@ -163,77 +142,55 @@ Browser will visit the faked server, and leak the HTTP cookies in "example.com" 
 With the leaked HTTP cookies, the faked server may pretend as the user to visit "abc.example.com", result in user's security issue and privacy leakage.
 
 
+Terminology
+===========
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+document are to be interpreted as described in {{RFC2119}}.
+
+Basic terms used in this specification are defined in the documents {{RFC1034}}, {{RFC1035}}, {{RFC8499}}.
+
+* Authoritative Server: Described in {{RFC8499}}.
+
+* Recursive Resolver: Described in {{RFC8499}}. 
+
+
 Explicit Forged Answer Signal
 =============================
 
-Recursive resolver should give explict forged answer signal to client. 
+To avoid the HTTP cookies leakage, the recursive resolver is responsible for giving explict forged answer signal to client, and client could make its own reaction when it received an explict forged answer signal from recursive resolver. 
 
-Format 1: Use Extended DNS Errors
----------------------------------
+Recursive Resolver
+------------------
 
-{{RFC8914}} defined Extended DNS Errors (EDE) extension.
+Recursive resolver could give the explict forged answer signal by including an additional Extended DNS Errors (EDE) information in DNS response, which is defined in {{RFC8914}}.
 
-Recursive resolver could give the signal by include additional EDE information in DNS response: 
-
-* INFO-Code is 4. 
-
-* EXTRA-TEXT is the specific scenario desciption, for example, malware.
-
-
-Format 2: Use TXT RR
---------------------
-
-{{RFC1035}} defined TXT RDATA format.
-
-Recursive resolver could give the signal by include additional TXT RR in DNS response, such as: 
+Alternatively, recursive resolver could include an TXT RR in DNS answer section, such as: 
 
     abc.example.com  300 IN  A  1.2.3.4
     abc.example.com  300 IN  TXT  "faked=malware" 
 
 
-Client Reaction
-===============
+Client
+------
 
-Client could make its own reaction when it received an explict forged answer signal from recursive resolver. 
-
-Reaction 1: Use DNSSEC
-----------------------
-
-Client could make DNSSEC query by itself. 
-
-If the domain has deployed DNSSEC, the client could validate the honest answer from authoritative server.
-
-
-Reaction 2: Change Recursive Resolver
--------------------------------------
-
-Client could change to another recursive resolver which is not lying.
-
-
-Reaction 3: Stop Visit
-----------------------
-
-Client could stop to visit on the website, since it knows that the answer is faked.
-
-
-Reaction 4: Limited Visit
--------------------------
-
-Client could make limited visit on the website, prevent HTTP cookies from being send to the faked server.
-
-For example, browser should not send user's HTTP cookies to the faked server, if it gets an explict faked answer signal in the DoH response {{RFC8484}}.
-
+These four actions can be implemented on client to deal with the forged answer:
+- Use DNSSEC: Client could make DNSSEC query by itself. If the domain has deployed DNSSEC, the client could validate the honest answer from authoritative server.
+- Change Recursive Resolver: Client could change to another recursive resolver which is not lying.
+- Stop Visit: Client could stop to visit on the website, since it knows that the answer is faked.
+- Limited Visit: Client could make limited visit on the website, prevent HTTP cookies from being send to the faked server. For example, browser should not send user's HTTP cookies to the faked server, if it gets an explict faked answer signal in the DoH response {{RFC8484}}.
 
 Security Considerations
 =======================
 
 Faked answer is unauthenticated by authoritative server, just offered by recursive resolver on some specific scenarios.
 
-Ideally, with the DNSSEC deployed on second level domain, client would not trust any faked answer if it makes all RRSIG validation by itself.
+With the DNSSEC deployed on second level domain, client would not trust any faked answer if it makes all RRSIG validation by itself.
 
-Explicit faked answer signal is to help client to make clearer reaction on faked answer, with the help of recursive resolver.
+Ideally, recursive resolver should be honest to client, give the explicit faked answer signal in DNS response.
 
-As a trade-off, explict faked answer signal could help browser to mitigate the http cookies leaked to faked server, protect user security and privacy in conditional limited environment.
+Explict faked answer signal could help browser to mitigate the http cookies leaked to faked server, protect user security and privacy in conditional limited environment.
 
 
 Acknowledgements
@@ -246,14 +203,3 @@ Thanks to all in the DNSOP mailing list.
 
 
 --- fluff
-
-<!--  LocalWords:  CoAP datagram CoRE WG RESTful IP ETag reassembler
--->
-<!--  LocalWords:  blockwise idempotence statelessly keepalive SZX
--->
-<!--  LocalWords:  acknowledgement retransmissions ACKs ACK untrusted
--->
-<!--  LocalWords:  acknowledgements interoperability retransmission
--->
-<!--  LocalWords:  BCP atomicity NUM WebDAV IANA
--->
