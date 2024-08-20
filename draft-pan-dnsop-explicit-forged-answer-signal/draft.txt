@@ -1,0 +1,280 @@
+
+
+
+
+dnsop                                                             L. Pan
+Internet-Draft                                            20 August 2024
+Intended status: Best Current Practice                                  
+Expires: 21 February 2025
+
+
+                     Explicit Forged Answer Signal
+            draft-pan-dnsop-explicit-forged-answer-signal-01
+
+Abstract
+
+   This document describes about the forged answer provided by recursive
+   resolver.
+
+   Client could protect user on security and privacy more efficiently if
+   recursive resolver gives explict signal in the forged answer.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 21 February 2025.
+
+Copyright Notice
+
+   Copyright (c) 2024 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+
+
+
+Pan                     Expires 21 February 2025                [Page 1]
+
+Internet-Draft                    EFAS                       August 2024
+
+
+Table of Contents
+
+   1.  Background  . . . . . . . . . . . . . . . . . . . . . . . . .   2
+     1.1.  HTTP Cookies Leakage  . . . . . . . . . . . . . . . . . .   2
+   2.  Terminology . . . . . . . . . . . . . . . . . . . . . . . . .   3
+   3.  Explicit Forged Answer Signal . . . . . . . . . . . . . . . .   3
+     3.1.  Recursive Resolver  . . . . . . . . . . . . . . . . . . .   3
+     3.2.  Client  . . . . . . . . . . . . . . . . . . . . . . . . .   3
+   4.  Security Considerations . . . . . . . . . . . . . . . . . . .   4
+   5.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   4
+   6.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   4
+     6.1.  Normative References  . . . . . . . . . . . . . . . . . .   4
+     6.2.  Informative References  . . . . . . . . . . . . . . . . .   5
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   5
+
+1.  Background
+
+   Recursive resolver may make a forged answer for a dns query in some
+   specific scenarios, such as NXDOMAIN, phishing, fraud, malware,
+   ransomware, botnet DDoS attack, and legal requirement, etc.  See also
+   [NXRedierct] [ISPRedirect] [DNSFirewall] [LegalRedirect].
+
+   The RCODE of faked answer is NOERROR, which make client hard to
+   distinguish it with honest answer, if client doesn't make iterative
+   dns query by itself, or make DNSSEC validation.
+
+   Faked answer can avoid user to visit malicious website, however, it
+   may also increase the security and privacy risk.
+
+1.1.  HTTP Cookies Leakage
+
+   The HTTP cookies risk has been well discussed in [NXDamageControl]
+   and [NXDNSLies].  Furthermore, the risk is not only occured on
+   NXDOMAIN scenario, but also on other faked answer scenarios.
+
+   Imagine that user visits "abc.example.com" in browser.
+
+   Recursive resolver return a faked answer to browser.
+
+   Browser will visit the faked server, and leak the HTTP cookies in
+   "example.com" of the user to it.
+
+   With the leaked HTTP cookies, the faked server may pretend as the
+   user to visit "abc.example.com", result in user's security issue and
+   privacy leakage.
+
+
+
+
+
+
+Pan                     Expires 21 February 2025                [Page 2]
+
+Internet-Draft                    EFAS                       August 2024
+
+
+2.  Terminology
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in [RFC2119].
+
+   Basic terms used in this specification are defined in the documents
+   [RFC1034], [RFC1035], [RFC8499].
+
+   *  Authoritative Server: Described in [RFC8499].
+
+   *  Recursive Resolver: Described in [RFC8499].
+
+3.  Explicit Forged Answer Signal
+
+   To avoid the HTTP cookies leakage, the recursive resolver is
+   responsible for giving explict forged answer signal to client, and
+   client could make its own reaction when it received an explict forged
+   answer signal from recursive resolver.
+
+3.1.  Recursive Resolver
+
+   Recursive resolver could give the explict forged answer signal by
+   including an additional Extended DNS Errors (EDE) information in DNS
+   response, which is defined in [RFC8914].
+
+   Alternatively, recursive resolver could include an TXT RR in DNS
+   answer section, such as:
+
+   abc.example.com  300 IN  A  1.2.3.4
+   abc.example.com  300 IN  TXT  "faked=malware"
+
+3.2.  Client
+
+   Client could implement its own policy to deal with the forged answer:
+
+   *  Use DNSSEC: Client could make DNSSEC query by itself.  If the
+      domain has deployed DNSSEC, the client could validate the honest
+      answer from authoritative server.
+
+   *  Change Recursive Resolver: Client could change to another
+      recursive resolver which is not lying.
+
+   *  Stop Visit: Client could stop to visit on the website, since it
+      knows that the answer is faked.
+
+
+
+
+
+
+Pan                     Expires 21 February 2025                [Page 3]
+
+Internet-Draft                    EFAS                       August 2024
+
+
+   *  Limited Visit: Client could make limited visit on the website,
+      prevent HTTP cookies from being send to the faked server.  For
+      example, browser should not send user's HTTP cookies to the faked
+      server, if it gets an explict faked answer signal in the DoH
+      response [RFC8484].
+
+4.  Security Considerations
+
+   Faked answer is unauthenticated by authoritative server, just offered
+   by recursive resolver on some specific scenarios.  With the DNSSEC
+   deployed on second level domain, client would not trust any faked
+   answer if it makes all RRSIG validation by itself.  Ideally,
+   recursive resolver should be honest to client, give the explicit
+   faked answer signal in DNS response.  Explict faked answer signal
+   could help browser to mitigate the http cookies leaked to faked
+   server, protect user security and privacy in conditional limited
+   environment.
+
+5.  Acknowledgements
+
+   Thanks to all in the DNSOP mailing list.
+
+6.  References
+
+6.1.  Normative References
+
+   [RFC1034]  Mockapetris, P., "Domain names - concepts and facilities",
+              STD 13, RFC 1034, DOI 10.17487/RFC1034, November 1987,
+              <https://www.rfc-editor.org/info/rfc1034>.
+
+   [RFC1035]  Mockapetris, P., "Domain names - implementation and
+              specification", STD 13, RFC 1035, DOI 10.17487/RFC1035,
+              November 1987, <https://www.rfc-editor.org/info/rfc1035>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC8484]  Hoffman, P. and P. McManus, "DNS Queries over HTTPS
+              (DoH)", RFC 8484, DOI 10.17487/RFC8484, October 2018,
+              <https://www.rfc-editor.org/info/rfc8484>.
+
+   [RFC8499]  Hoffman, P., Sullivan, A., and K. Fujiwara, "DNS
+              Terminology", RFC 8499, DOI 10.17487/RFC8499, January
+              2019, <https://www.rfc-editor.org/info/rfc8499>.
+
+
+
+
+
+Pan                     Expires 21 February 2025                [Page 4]
+
+Internet-Draft                    EFAS                       August 2024
+
+
+   [RFC8914]  Kumari, W., Hunt, E., Arends, R., Hardaker, W., and D.
+              Lawrence, "Extended DNS Errors", RFC 8914,
+              DOI 10.17487/RFC8914, October 2020,
+              <https://www.rfc-editor.org/info/rfc8914>.
+
+6.2.  Informative References
+
+   [DNSFirewall]
+              ISC, "Response Policy Zones (RPZ)", n.d.,
+              <https://www.isc.org/rpz/>.
+
+   [ISPRedirect]
+              Weber, J. L. R., "DNS Redirect Use by Service Providers",
+              n.d., <https://datatracker.ietf.org/doc/draft-livingood-
+              dns-redirect/>.
+
+   [LegalRedirect]
+              York, D., "Oups! French Government Mistakenly Blocks
+              Telegram Access for Millions", n.d.,
+              <https://pulse.internetsociety.org/blog/oups-french-
+              government-mistakenly-blocks-telegram-access-for-
+              millions>.
+
+   [NXDamageControl]
+              Vixie, P., "What DNS Is Not", n.d.,
+              <https://queue.acm.org/detail.cfm?id=1647302>.
+
+   [NXDNSLies]
+              Huston, G., "NXDOMAIN?", n.d.,
+              <https://www.potaroo.net/ispcol/2009-12/nxdomain.pdf>.
+
+   [NXRedierct]
+              ISC, "NXDOMAIN Redirection Using DLZ in BIND 9.10 and
+              later", n.d., <https://kb.isc.org/docs/aa-01150>.
+
+Author's Address
+
+   Lanlan Pan
+   Guangdong
+   China
+   Email: abbypan@gmail.com
+
+
+
+
+
+
+
+
+
+
+Pan                     Expires 21 February 2025                [Page 5]
