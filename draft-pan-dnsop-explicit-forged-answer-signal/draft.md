@@ -175,21 +175,22 @@ Alternatively, recursive resolver could include an TXT RR in DNS answer section,
 Client
 ------
 
-These four actions can be implemented on client to deal with the forged answer:
-- Use DNSSEC: Client could make DNSSEC query by itself. If the domain has deployed DNSSEC, the client could validate the honest answer from authoritative server.
-- Change Recursive Resolver: Client could change to another recursive resolver which is not lying.
-- Stop Visit: Client could stop to visit on the website, since it knows that the answer is faked.
-- Limited Visit: Client could make limited visit on the website, prevent HTTP cookies from being send to the faked server. For example, browser should not send user's HTTP cookies to the faked server, if it gets an explict faked answer signal in the DoH response {{RFC8484}}.
+Client could implement its own policy to deal with the forged answer:
+
+* Use DNSSEC: Client could make DNSSEC query by itself. If the domain has deployed DNSSEC, the client could validate the honest answer from authoritative server.
+
+* Change Recursive Resolver: Client could change to another recursive resolver which is not lying.
+
+* Stop Visit: Client could stop to visit on the website, since it knows that the answer is faked.
+
+* Limited Visit: Client could make limited visit on the website, prevent HTTP cookies from being send to the faked server. For example, browser should not send user's HTTP cookies to the faked server, if it gets an explict faked answer signal in the DoH response {{RFC8484}}.
 
 Security Considerations
 =======================
 
 Faked answer is unauthenticated by authoritative server, just offered by recursive resolver on some specific scenarios.
-
 With the DNSSEC deployed on second level domain, client would not trust any faked answer if it makes all RRSIG validation by itself.
-
 Ideally, recursive resolver should be honest to client, give the explicit faked answer signal in DNS response.
-
 Explict faked answer signal could help browser to mitigate the http cookies leaked to faked server, protect user security and privacy in conditional limited environment.
 
 

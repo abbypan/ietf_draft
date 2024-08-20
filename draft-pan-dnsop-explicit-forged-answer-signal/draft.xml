@@ -117,23 +117,23 @@ abc.example.com  300 IN  TXT  "faked=malware"
 </section>
 <section anchor="client"><name>Client</name>
 
-<t>These four actions can be implemented on client to deal with the forged answer:
-- Use DNSSEC: Client could make DNSSEC query by itself. If the domain has deployed DNSSEC, the client could validate the honest answer from authoritative server.
-- Change Recursive Resolver: Client could change to another recursive resolver which is not lying.
-- Stop Visit: Client could stop to visit on the website, since it knows that the answer is faked.
-- Limited Visit: Client could make limited visit on the website, prevent HTTP cookies from being send to the faked server. For example, browser should not send user's HTTP cookies to the faked server, if it gets an explict faked answer signal in the DoH response <xref target="RFC8484"/>.</t>
+<t>Client could implement its own policy to deal with the forged answer:</t>
+
+<t><list style="symbols">
+  <t>Use DNSSEC: Client could make DNSSEC query by itself. If the domain has deployed DNSSEC, the client could validate the honest answer from authoritative server.</t>
+  <t>Change Recursive Resolver: Client could change to another recursive resolver which is not lying.</t>
+  <t>Stop Visit: Client could stop to visit on the website, since it knows that the answer is faked.</t>
+  <t>Limited Visit: Client could make limited visit on the website, prevent HTTP cookies from being send to the faked server. For example, browser should not send user's HTTP cookies to the faked server, if it gets an explict faked answer signal in the DoH response <xref target="RFC8484"/>.</t>
+</list></t>
 
 </section>
 </section>
 <section anchor="security-considerations"><name>Security Considerations</name>
 
-<t>Faked answer is unauthenticated by authoritative server, just offered by recursive resolver on some specific scenarios.</t>
-
-<t>With the DNSSEC deployed on second level domain, client would not trust any faked answer if it makes all RRSIG validation by itself.</t>
-
-<t>Ideally, recursive resolver should be honest to client, give the explicit faked answer signal in DNS response.</t>
-
-<t>Explict faked answer signal could help browser to mitigate the http cookies leaked to faked server, protect user security and privacy in conditional limited environment.</t>
+<t>Faked answer is unauthenticated by authoritative server, just offered by recursive resolver on some specific scenarios.
+With the DNSSEC deployed on second level domain, client would not trust any faked answer if it makes all RRSIG validation by itself.
+Ideally, recursive resolver should be honest to client, give the explicit faked answer signal in DNS response.
+Explict faked answer signal could help browser to mitigate the http cookies leaked to faked server, protect user security and privacy in conditional limited environment.</t>
 
 </section>
 <section anchor="acknowledgements"><name>Acknowledgements</name>
@@ -221,71 +221,71 @@ abc.example.com  300 IN  TXT  "faked=malware"
     </references>
 
 
-<?line 202?>
+<?line 203?>
 
 
 
   </back>
 
 <!-- ##markdown-source:
-H4sIAAAAAAAAA41Ya3PbuBX9zl9x63zYTUeUJT8SWzOZrWPJiTt+VXKabDqd
-HYgEJawogguQUtSd/PeeC5CUaCtuNbMbkATu89xzLxyGYVCoIpUDGn3LUxWp
-gq60mcmYLjK7loYmapaJNBDTqZEr7Lq6mASxjjKxxJnYiKQIc5GFcWZ1HspK
-Rpg4GaFwMkLrZIS9fhCLAseOekcnYe8sPOoFwSuyhcji30SqM3wqTCmDwBZG
-iuWArkePV4HKjXtvi6Ne77x3FAh8HJDObbCewQbWHCzW2J0V0mSyCIdsVhCJ
-YkDTKA+CSMcqw9aySMKzIFcDwu8VRSKj0koSxogN/awSEmlKG2lfkzY0F3ZO
-c2kkTKSQCh35hdUG1iW2etos3QPxhgEfxrLeMnBqYpmIMi0sdtTf/SG/PRBl
-MddmEJD7hdW/RCrDjpsuPYiseefDfiOyFLbvfniFgA9o+0h1wh6/Xu+85cDK
-YrDzJqQHbYtERHM6Pu6dnPRa396raap0MZcLnOxSf/uxkrRVibRvBvShFNks
-1tlsuxPRh83D8Ojs+PR8u12XWWFw4nKuMrHdnc8dDrYvYJpVS5XuvpRLodIB
-+7gB+P4248dupJdBkGmzFIVayQHnpwopmSQ66vfPn756038DkeOrS/448Mt+
-7/hkuzytlmcn5/WGs/P+SfP27MTpYRHHvbN6fXJ6flSv3572T+v1We+o16zf
-vnnbrPvnzdnzU94TqCzZekJ092UsYyVNVOWuqtm7L8P724vrO+KvRkaF0hl9
-sgA7DW++AkH0/vpuSOfdfo9QZJSi/IwXIFCgSN+8KHI7ODxcTLvKRl2g6BDV
-bQ+FQLn2Tz0aniK0CaOD6PbRo7PJkoPk9eTSb6hLv4eiJ7x+qG1ueTS8mzTO
-wBNJ0w1NpFmpSNKD0SsVS2P3egD5ojAiWkjTVbJIal8OPUmlaoWwaB0zVYWm
-UnG417+2P3/v0k19uEPjLn2W0yqK+B8MvoKoNaij5chY2lxncOBBgxI39BWw
-tvTz+OHr673mr9frJgMm/8/LhjWRxZsbORPp3ljel7n9C10ZmaG4P+gVyHEp
-s4JuFSh3IbN0Q+9THS0sPcpUzoxY0kUUSWsJ2MOuFKWf7Q92XqZWdlVFuFZH
-iPjG2T5N9exQQ3OYOMXhrFEcLhvF4dQpDotKcSicYu4b2LWj+OXUDMGCv2qz
-qJOBehBLMZOXGtyi2wn5PBeFg9e1pTtd7HXrj1KWsiuipQePLByvJMtfVPyu
-/+bk7TG6z/+26gF0T/9U35TcsetucqOk3Vu9v/wQELnGW627iPGhsnmk00Pu
-gWH/6DD7FmvQXtbN4+T/sOmD1ElCH9FEdYami2wwXW9LdzK6uRrQwb/AQF/w
-+/cBd+YwDCnThfztejT58BuChl6I19NU1P8FAe8RU8uVVwTB41xZQtGVDmix
-tJFRU+BeTHVZEPoI+cmA/GRAuS/pmMsc+C2NBeFhZXUK1HSD4DJVLAndIo15
-d8G8gKZtCExn+QT8cNyWG7USKLSlNpJkkmAOwUlgHH39uWia4cmSH1gK8hMK
-E+YzG7vknVyqOE4xm7wHxcwMulccvGt+QTB+rmKJqWIJvJN44jWXl+DBhQA4
-s2G1Vi8l2VxGCoaTjWQmjNK2Q4EtUb3CNmjpUI4go2nOOpQYUYKTliJdYyjq
-kIECvfTrqS4AGxoO9YREUcDqju8BzBcw8o8SjMFp6pAsom4wkTA0tZr+/HPb
-bb5/x+MOV7vnHcpzzy0G+v69yzCQNL68H45IJ5QgBI3rgMfd/Wg8vh93aD1X
-cM1FKPJpngsT85gUgyjgYAk/CRPpWhUYxZhAi0pOh7NaHYq1tNlPhRekwEiu
-a+6EF9hShZVp0uG5zm2DC5PRJa1EqtA3wDYw+mrXTp4NxUqr2IMNNq2UVayE
-B1xdWlrLKV4g0HO9litnUuFS7oKosghTKuif8bQXp0bZBbR+fHx8oEutF2AH
-cLlYgL4Yb89+Pqpue1RtZxE8p9JUygwGYXpF5KLSWjgCUHEmW4SIdLEJ7r0n
-JKSLrkoDKw0XTsfZ6+QiU6h9lBlKSEdwADJRc83IUWMUSENpO6fxmWdF0055
-A2Z4ew1jVMZREVUZu7BaOhDTqCu/iWWeSp7kDtj+qdFr62hgT3UZWZQm49ra
-VYZEbU+99yvgB5Hx+XPl7Q7gg8uarwmxcJ9a4YUFBy2TAGbeVCNCFdDxmbHJ
-b1kGxO5K6DxT5wCSw3QJrUjcrjhv4LNAdNhl3B/YHN76k93iSVlbyhaqUo8g
-GBY8IqUq0+jHmx2meudxtJAbWmsTI/K3nyaP0OL+RXG69Xj0j0/X49GQ15OP
-Fzc3zcLvCPBw/+mm+s6r7cnL+9vb0d3QH769+PXAx/jg/uHx+v7u4ubA06yy
-QdMoQFguc6hfHilcgFx86g5Swbka1R3HvBcWTIndS8txiWupDYu6unaicQMD
-6OKa3mu11kvkif/7907zcNo88NTvdP2VLlx3VYXnlolLJuaPZ+btHNlidlxh
-9oUDaDLByzfwdy/9kFRd8dUzGFeQqEr7eSEhZMYPq7jsuebHzZHvEHV3bHev
-qlciX56AfXqj3UZdUbElvc4gXPiLyXoOloJ7sEHCAhb4sorE6OW+sYB2CaEO
-7h7S3Msb3kJu/y4gLxrAnSOL0pL/fMDWijhW7Ao+jb5xDeMEj5QjY7TBdD8a
-jl5Tc3WDy8gyf6/iK+uex0PSFpMeB7hWOuBcpDxUO5ylm86+hHkPvGFc/fT4
-5ZHG41pZ7YK/DnaoGiBwMfNzYptfiI57PQKf0wVRv3vUPe6evLyPtdGBY7V3
-1eRxwPD1o1qw060so6nErOMssa6pco2zTC5A31Eq5HDblwjsuibUVkYGQeiu
-g75xD+jyGdyqlv6k5XfpOqmKnqdl1y1jmad641OHI74wWvit5gKPkNbg4TEp
-Wmzgqb0LCy/nIpvJvZXfMjjy++CyyHzH3JPmBirchtMNIMgqJoXOcblAq3gi
-0/KHpo1oT3XNkGIBFy5JWmToib7/8obtWOYSyhpu1FJxavYpcZFOqw37NYG8
-V3ygxUEualPJZWS59cHOp62xy7RHFeI6dRcnO3eKOQbuZNUCW9L3SHMDIqzD
-lcq2eKY1mbSm/qH+2BRqzc1nviYndcO9ZJaM3YjJN9QfsvHVk5m3zBgyfOtC
-W/LXnX0Y6tDvuKFhzkik+dGlyF189t8WdseRqhwarPvrknbDDpilqodOjft1
-E2X3l1aYvnkyuCd+vl3wbQ7j1Hg8uf6wM0DvlBzGPK7kH7BXldBpU1g7jeQJ
-K6sf5muXVLt159y/2wN3LtO8wRQ0AsFq1lQ4rtytdikdQtt4al0+9070sIsD
-XHeIukxktlJGu7+A8Fh2EXEJpjKeOQ58DiKmTpEtHKw50jU87yb3D8R/6eQq
-SnFDYml8M53iblctk7RMkuC/rFi6DtYXAAA=
+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
+6QxXumqZpGWSBP8FMeFwBs0XAAA=
 
 -->
 
