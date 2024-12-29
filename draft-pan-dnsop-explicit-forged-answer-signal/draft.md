@@ -38,6 +38,37 @@ author:
         #phone: 
         #facsimile: 
         email: abbypan@gmail.com
+      -
+        ins: Y. Fu
+        name: Yu Fu
+        org: China Unicom
+#         abbrev: 
+        # street:
+        # - 
+        # - 
+        #street: 
+        city: Beijing
+        #code: D-28359
+        country: China
+        #phone: 
+        #facsimile: 
+        email: fuy186@chinaunicom.cn
+      -
+        ins: C. Wang
+        name: Cuicui Wang
+        org: China Unicom
+#         abbrev: 
+        # street:
+        # - 
+        # - 
+        #street: 
+        city: Beijing
+        #code: D-28359
+        country: China
+        #phone: 
+        #facsimile: 
+        email: wangcc107@chinaunicom.cn
+        
 
 normative:
 #        - rfc2119
