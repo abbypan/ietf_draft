@@ -1,3 +1,9 @@
+#  Authenticated subdomain whitelist (ASDWL) for second-level domain (SLD) 
+
+latest: [draft.html](draft-pan-dnsop-authenticated-subdomain-whitelist/draft.html)
+
+ietf: [draft-pan-dnsop-authenticated-subdomain-whitelist](https://datatracker.ietf.org/doc/draft-pan-dnsop-authenticated-subdomain-whitelist/)
+
 # Compact DNSSEC
 
 latest: [draft.html](draft-pan-dnsop-compact-dnssec/draft.html)
@@ -16,8 +22,3 @@ latest: [draft.html](draft-pan-dnsop-edns-isp-location/draft.html)
 
 ietf: [draft-pan-dnsop-edns-isp-location](https://datatracker.ietf.org/doc/draft-pan-dnsop-edns-isp-location/)
 
-# SWILD RR Type (Wildcard on Intermediate Nameservers)
-
-latest: [draft.txt](draft-pan-dnsop-swild-rr-type/draft.txt)
-
-ietf: [draft-pan-dnsop-swild-rr-type](https://datatracker.ietf.org/doc/draft-pan-dnsop-swild-rr-type/)
