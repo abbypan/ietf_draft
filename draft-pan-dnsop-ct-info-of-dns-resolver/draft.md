@@ -1,8 +1,8 @@
 ---
-title: Certificate Transparency (CT) information of  DNS resolver
+title: Certificate Transparency (CT) information of DNS resolver
 abbrev: EFAS
 docname: draft-pan-dnsop-ct-info-of-dns-resolver
-date: 2025-09-04
+date: 2025-09-05
 
 # stand_alone: true
 
@@ -19,33 +19,25 @@ pi:    # can use array (if all yes) or hash here
 #  - sortrefs
 #  - symrefs
   toc: yes
-  sortrefs:   # defaults to yes
+  sortrefs:
   symrefs: yes
 
 author:
       -
         ins: L. Pan
         name: Lanlan Pan
-        #org: 
-        # abbrev: TZI
-        # street:
-        # - Postfach 330440
-        # - Bibliothekstr. 1
-        #street: 
+	street: 
         city: Guangdong
-        #code: D-28359
+	region:
+	code:
         country: China
-        #phone: 
-        #facsimile: 
         email: abbypan@gmail.com
         
 
 normative:
-#        - rfc2119
-#        - rfc2616
-#  RFC1034:
-#  RFC1035:
-#  RFC2119:
+   RFC1034:
+   RFC1035:
+   RFC2119:
 #  RFC2308:
 #  RFC4592:
 #  RFC7515:
@@ -66,9 +58,9 @@ informative:
     title: Mis-issued certificates for 1.1.1.1 DNS service pose a threat to the Internet
     target: https://arstechnica.com/security/2025/09/mis-issued-certificates-for-1-1-1-1-dns-service-pose-a-threat-to-the-internet/
     author:
-      - Dan Goodin
+      - 
 #        ins: 
-#        name: 
+         name: Dan Goodin
 #        org: ISC
     date: 2025
 
@@ -77,9 +69,9 @@ informative:
     title: Domain Name System (DNS) Parameters
     target: https://www.iana.org/assignments/dns-parameters/
     author:
-      - IANA
+      - 
 #        ins: 
-#        name: 
+         name: IANA
 #        org: ISC
 
 
@@ -94,19 +86,19 @@ informative:
 
 --- abstract
 
-This document describes about the Certificate Transparency (CT) information of the encrypted DNS resolver.
+This document describes the Certificate Transparency (CT) information of the DNS resolver.
 
 --- middle
 
 Background
 ==========
 
-DNS resolver can supports any encrypted DNS scheme, such as DNS over HTTPS (DoH) {{RFC8484}}, DNS over TLS (DoT) {{RFC7858}}, or DNS over QUIC (DoQ) {{RFC9250}}.
+DNS resolver can support any encrypted DNS scheme, such as DNS over HTTPS (DoH) {{RFC8484}}, DNS over TLS (DoT) {{RFC7858}}, or DNS over QUIC (DoQ) {{RFC9250}}.
 
-Certificate hijacking allows attackers to impersonate legitimate encrypted DNS resolver, see also {{MisIssuedCF}}.
+Certificate hijacking allows attackers to impersonate a legitimate encrypted DNS resolver, see also {{MisIssuedCF}}.
 Certificate Transparency (CT) is to combat the certificate hijacking issue {{RFC9162}}.
 
-This document describes about the CT information of the encrypted DNS resolver.
+This document describes the CT information of the encrypted DNS resolver.
 
 
 Terminology
@@ -124,9 +116,11 @@ IANA Considerations
 DNS Resolver Information Keys Registration
 ---------------------------------------------
 
+{{RFC9606}} specifies a method for DNS resolvers to publish information about themselves.
+
 IANA has created a new registry called "DNS Resolver Information Keys" {{IANA-DNS}}.
 
-This document adds a new DNS Resolver Information Key : CT, to present the CT information of the encrypted DNS resolver. 
+This document adds a new DNS Resolver Information Key: CT, to present the CT information of the encrypted DNS resolver. 
 
 
 Name:
@@ -134,7 +128,7 @@ Name:
 Value:
     1
 Meaning:
-    The value indicates that the certifcate of encrypted DNS resolver contains embeded SCTs.
+    The value indicates that the certificate of the encrypted DNS resolver contains embedded SCTs.
 Reference:
     RFC 9162
 
@@ -144,7 +138,7 @@ Name:
 Value:
     2
 Meaning:
-    The value indicates that the encrypted DNS resolver supports transparency_info TLS extension.
+    The value indicates that the encrypted DNS resolver supports the transparency_info TLS extension.
 Reference:
     RFC 9162
 
@@ -152,9 +146,8 @@ Reference:
 Security Considerations
 =======================================
 
-The DNS clients can received trustable DNS resolver information through DNSSEC or out-of-band configuration. 
-
-If the DNS clients find that CT is supported in the trustable DNS resolver information, they can mandate the CT validation in encrypted communication channel setup process.
+DNS clients can get trustworthy DNS resolver information through DNSSEC query or out-of-band configuration.
+Suppose the DNS clients find the CT value in the trustworthy DNS resolver information. In that case, they can mandate the CT validation in the encrypted communication channel setup process with the encrypted DNS resolver.
 
 
 Acknowledgements
