@@ -26,10 +26,10 @@ author:
       -
         ins: L. Pan
         name: Lanlan Pan
-	street: 
+        street: 
         city: Guangdong
-	region:
-	code:
+        region:
+        code:
         country: China
         email: abbypan@gmail.com
         
@@ -59,9 +59,9 @@ informative:
     target: https://arstechnica.com/security/2025/09/mis-issued-certificates-for-1-1-1-1-dns-service-pose-a-threat-to-the-internet/
     author:
       - 
-#        ins: 
+         ins: 
          name: Dan Goodin
-#        org: ISC
+         org: 
     date: 2025
 
 
@@ -70,9 +70,9 @@ informative:
     target: https://www.iana.org/assignments/dns-parameters/
     author:
       - 
-#        ins: 
+         ins: 
          name: IANA
-#        org: ISC
+         org: 
 
 
     
@@ -96,8 +96,8 @@ Background
 DNS resolver can support any encrypted DNS scheme, such as DNS over HTTPS (DoH) {{RFC8484}}, DNS over TLS (DoT) {{RFC7858}}, or DNS over QUIC (DoQ) {{RFC9250}}.
 
 Certificate hijacking allows attackers to impersonate a legitimate encrypted DNS resolver, see also {{MisIssuedCF}}.
-Certificate Transparency (CT) is to combat the certificate hijacking issue {{RFC9162}}.
 
+Certificate Transparency (CT) is to combat the certificate hijacking issue {{RFC9162}}.
 This document describes the CT information of the encrypted DNS resolver.
 
 
@@ -125,20 +125,26 @@ This document adds a new DNS Resolver Information Key: CT, to present the CT inf
 
 Name:
     CT
+
 Value:
     1
+
 Meaning:
     The value indicates that the certificate of the encrypted DNS resolver contains embedded SCTs.
+
 Reference:
     RFC 9162
 
 
 Name:
     CT
+
 Value:
     2
+
 Meaning:
     The value indicates that the encrypted DNS resolver supports the transparency_info TLS extension.
+
 Reference:
     RFC 9162
 
@@ -147,6 +153,7 @@ Security Considerations
 =======================================
 
 DNS clients can get trustworthy DNS resolver information through DNSSEC query or out-of-band configuration.
+
 Suppose the DNS clients find the CT value in the trustworthy DNS resolver information. In that case, they can mandate the CT validation in the encrypted communication channel setup process with the encrypted DNS resolver.
 
 
